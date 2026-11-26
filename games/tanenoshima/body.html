@@ -1,0 +1,17 @@
+<style>
+:root{--bg:#10141f;--fg:#f0ead2;--mut:#8a8f98;--key:#262d40;--acc:#f2c14e;color-scheme:dark}
+html,body{height:100%}
+[hidden]{display:none!important}
+body{margin:0;box-sizing:border-box;background:var(--bg);color:var(--fg);font:12px/1.5 monospace;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;padding-block:8px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));overflow:hidden;touch-action:none;user-select:none;-webkit-user-select:none}
+canvas{image-rendering:pixelated;outline:1px solid var(--key);max-width:100%}
+#t{display:flex;justify-content:space-between;align-items:center;width:100%;max-width:420px}
+#t div{display:grid;grid-template-columns:repeat(3,48px);grid-auto-rows:48px;gap:4px}
+#t b{display:grid;place-items:center;background:var(--key);border-radius:10px;font-size:16px}
+#t b:active{background:var(--acc);color:var(--bg)}
+#t .ab{grid-template-columns:repeat(2,60px);grid-auto-rows:60px;gap:12px}
+#t .ab b{border-radius:50%}
+p{margin:0;color:var(--mut);text-align:center}
+</style>
+<canvas id="c"></canvas>
+<div id="t"><div><i></i><b data-k="U">▲</b><i></i><b data-k="L">◀</b><i></i><b data-k="R">▶</b><i></i><b data-k="D">▼</b><i></i></div><div class="ab"><b data-k="B">B</b><b data-k="A">A</b></div></div>
+<p>やじるし/WASD いどう ・ Z けってい ・ X メニュー</p>
