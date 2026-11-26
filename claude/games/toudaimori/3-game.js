@@ -1,14 +1,15 @@
 const W = 160, H = 144;
 const cv = document.getElementById('c'), cx = cv.getContext('2d');
 const sc = cnv(W, H), X = sc.getContext('2d');
+X.imageSmoothingEnabled = false;
 const rnd = () => Math.random();
 const ri = n => rnd() * n | 0;
 
 // ---------- もじ (美咲フォントの ぬきだし。ビルド時に つかう字だけ うめこむ) ----------
 const [FCH, FDT] = '__FONT__'.split('\t'), fb = atob(FDT || ''), fonts = {};
-function T(s, x, y, col = '1', al = 0) {
+function T(s, x, y, col = '1', al = 0, k = 1) {
   s = '' + s;
-  x -= s.length * 4 * al;
+  x -= s.length * 4 * al * k;
   let f = fonts[col];
   if (!f) {
     f = fonts[col] = cnv(FCH.length * 8, 8);
@@ -16,7 +17,7 @@ function T(s, x, y, col = '1', al = 0) {
     g.fillStyle = C(col);
     for (let i = 0; i < fb.length; i++) for (let b = 0; b < 7; b++) fb.charCodeAt(i) >> (6 - b) & 1 && g.fillRect((i / 7 | 0) * 8 + b, i % 7, 1, 1);
   }
-  for (const ch of s) { const i = FCH.indexOf(DIG[ch] || ch); i >= 0 && X.drawImage(f, i * 8, 0, 8, 8, x, y, 8, 8); x += 8; }
+  for (const ch of s) { const i = FCH.indexOf(DIG[ch] || ch); i >= 0 && X.drawImage(f, i * 8, 0, 8, 8, x, y, 8 * k, 8 * k); x += 8 * k; }
 }
 const R = (x, y, w, h, c) => { X.fillStyle = C(c); X.fillRect(x, y, w, h); };
 const spr = (im, x, y, flip) => { x = Math.round(x); y = Math.round(y); if (flip) { X.save(); X.scale(-1, 1); X.drawImage(im, -x - im.width, y); X.restore(); } else X.drawImage(im, x, y); };
@@ -134,7 +135,7 @@ const gi = i => ((rid >> 2) * 8 + (i / 10 | 0)) * 40 + (rid & 3) * 10 + i % 10;
 const FLR = '.,_ =';
 const under = i => FLR.includes(cur[i - 1]) && i % 10 ? cur[i - 1] : th ? ' ' : '.';
 const SOLID = 'TM~#^HBOScCDdiIYy"*GVWKF';
-const KEY = 'kb32-tomoshibi';
+const KEY = 'kb32-toudaimori';
 const save = () => { try { localStorage[KEY] = JSON.stringify(G); } catch (e) { } };
 const load = () => { try { const g = JSON.parse(localStorage[KEY]); return g.c && g; } catch (e) { } };
 const checkpoint = () => { G.c = [rid, P.x, P.y]; save(); };
@@ -303,7 +304,7 @@ async function ending() {
   scene = () => {
     R(0, 0, W, H, '0');
     spr(SHARD, 72, 24);
-    T('ともしびの しま', 80, 48, 'e', 1);
+    T('ちいさな とうだいもり', 80, 48, 'e', 1);
     T('おしまい', 80, 68, '1', 1);
     T('じかん ' + (G.t / 3600 | 0) + 'ふん', 80, 90, '9', 1);
     T('たおれた かず ' + G.dth, 80, 102, '9', 1);
@@ -546,10 +547,11 @@ async function title() {
   scene = () => {
     X.save(); X.translate(0, 16); drawRoom(X); X.restore();
     X.globalAlpha = .55; R(0, 0, W, H, '0'); X.globalAlpha = 1;
-    R(0, 22, W, 34, '0');
+    R(0, 0, W, 74, '0');
     spr(SHARD, 72, 2 + Math.sin(fr / 20) * 2);
-    T('ともしびの しま', 80, 28, 'e', 1);
-    T('３２ＫＢの ぼうけん', 80, 42, '9', 1);
+    // だいめいは 2ばいの おおきさで、かげつき
+    ['ちいさな', 'とうだいもり'].forEach((s, i) => { T(s, 82, 23 + i * 18, 'c', 1, 2); T(s, 80, 21 + i * 18, 'e', 1, 2); });
+    T('きえた あかりと ３つの かけら', 80, 61, '1', 1);
     const it = sv ? ['つづきから', 'はじめから'] : ['はじめる'];
     it.forEach((s, i) => { T(s, 80, 100 + i * 12, i == sel ? '1' : '9', 1); i == sel && R(80 - s.length * 4 - 8, 102 + i * 12, 4, 4, 'e'); });
     T('Ｚ：けってい', 80, 132, '9', 1);

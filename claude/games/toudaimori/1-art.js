@@ -1,4 +1,4 @@
-// ともしびのしま — 32KB縛りの謎解きアクション。絵はすべてこのファイルの文字列から作る。
+// ちいさなとうだいもり — 32KB縛りの謎解きアクション。絵はすべてこのファイルの文字列から作る。
 // 色: 36進1文字で引く
 const COL = '10141f f0ead2 2b5fa8 4f8fd8 e6d38a c9b164 6fbf5a 4a9a45 2f6b3a 8a8f98 5b6170 c98b4a 8a5a2e e0563f f2c14e 9a6fd0 b9bec9 9bdc7a 26332b 2f4036 1b2233 232c42 3a3440 4a4352 2a3f6b 3f5f9a a8dadc ffffff 8a2f25 f8d4b4'.split(' ');
 const C = c => '#' + COL[parseInt(c, 36)];
