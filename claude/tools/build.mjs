@@ -5,6 +5,7 @@ import { minify } from 'terser';
 import { readFileSync, writeFileSync, mkdirSync, statSync, rmSync, readdirSync } from 'node:fs';
 import { execFileSync } from 'node:child_process';
 
+process.chdir(new URL('..', import.meta.url).pathname);   // どこから呼んでも このフォルダを基準にする
 const name = process.argv[2], LIMIT = +(process.argv[3] || 32768);
 const src = `games/${name}`, out = `dist/${name}`;
 const body = readFileSync(`${src}/body.html`, 'utf8').replace(/\n/g, '');
