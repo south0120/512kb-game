@@ -1,0 +1,619 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#152e37">
+<link rel="icon" href="data:,">
+<title>聖夜のえんとつ便</title>
+<style>
+body:has(> #sx-shell){margin:0;background:#102a31}
+#sx-shell{--sx-paper:#fbf2dc;--sx-cream:#ffdf8f;--sx-ink:#152f35;--sx-red:#b03436;box-sizing:border-box;width:min(930px,100%);margin:0 auto;padding:clamp(12px,4vw,36px);color:var(--sx-ink);font:500 15px/1.5 "Hiragino Kaku Gothic ProN","Yu Gothic",system-ui,sans-serif;isolation:isolate}
+#sx-shell *{box-sizing:border-box}
+#sx-shell .sx-ticket{overflow:hidden;background:var(--sx-paper);border:2px solid #29494b;border-radius:6px;box-shadow:0 7px 0 #061d24}
+#sx-shell .sx-stripe{height:7px;background:repeating-linear-gradient(130deg,#b7433e 0 13px,#f6ead3 13px 23px,#38716c 23px 36px,#f6ead3 36px 46px)}
+#sx-shell .sx-header{display:flex;align-items:center;justify-content:space-between;gap:9px;padding:clamp(12px,2.5vw,22px) clamp(12px,3vw,26px)}
+#sx-shell .sx-tag{font-size:11px;color:#875042;font-weight:800;letter-spacing:.14em;margin:0 0 2px}
+#sx-shell h1{margin:0;font-family:"Yu Mincho","Hiragino Mincho ProN",serif;font-weight:900;font-size:clamp(23px,5vw,43px);letter-spacing:.035em;line-height:1.15;color:#244446}
+#sx-shell button{cursor:pointer;touch-action:manipulation;font:inherit}
+#sx-shell button:focus-visible,#sx-shell canvas:focus-visible{outline:3px solid #d98e32;outline-offset:2px}
+#sx-shell #sx-audio{white-space:nowrap;padding:7px 10px;background:#fff8e8;border:1px solid #abac91;border-radius:4px;color:#355054;font-weight:700;font-size:12px;align-self:center;min-height:38px}
+#sx-shell .sx-stage{position:relative;background:#18394a;border-block:2px solid #243e45}
+#sx-shell #sx-screen{display:block;margin:0;width:100%;height:auto;aspect-ratio:384/200;image-rendering:pixelated;touch-action:manipulation;cursor:pointer}
+#sx-shell .sx-hud{display:grid;grid-template-columns:repeat(3,1fr);gap:1px;background:#416063;border-bottom:1px solid #253f42;color:#fef3cf}
+#sx-shell .sx-meter{background:#21474b;text-align:center;padding:7px 2px;display:flex;align-items:baseline;justify-content:center;gap:9px}
+#sx-shell .sx-meter span{font-size:12px;color:#e7e8c4}
+#sx-shell .sx-meter b{font:700 20px/1.15 ui-monospace,monospace;color:#ffe097;letter-spacing:.025em}
+#sx-shell .sx-lower{padding:clamp(12px,2.5vw,23px) clamp(12px,3vw,26px);display:grid;grid-template-columns:1fr auto;align-items:center;gap:14px}
+#sx-shell .sx-lower h2{font-size:clamp(16px,2.6vw,22px);margin:0 0 2px;color:#244446;line-height:1.4}
+#sx-shell #sx-info{font-size:14px;line-height:1.55;margin:0;color:#445e58}
+#sx-shell #sx-act{min-width:128px;padding:11px 17px;border:1px solid #852f2d;border-bottom:3px solid #752d2a;border-radius:5px;background:var(--sx-red);color:#fff7dd;font-weight:800;letter-spacing:.03em}
+#sx-shell #sx-act:hover{background:#963034}
+#sx-shell #sx-act:active{transform:translateY(1px)}
+#sx-shell .sx-manual{border-top:1px dashed #adae93;padding:9px clamp(12px,3vw,26px);display:flex;flex-wrap:wrap;gap:4px 13px;align-items:center;justify-content:space-between;color:#56645a;font-size:12px}
+#sx-shell .sx-manual p{margin:0}
+#sx-shell #sx-pause{color:#3c5654;text-decoration:underline;text-underline-offset:2px;border:0;background:transparent;padding:6px 1px;font-size:12px}
+#sx-shell #sx-pause[hidden]{display:none}
+@media(max-width:540px){#sx-shell{padding:8px 4px}#sx-shell .sx-lower{grid-template-columns:1fr;gap:9px}#sx-shell #sx-act{width:100%;min-height:44px}#sx-shell .sx-meter{gap:3px;flex-direction:column;align-items:center;padding:4px 0}#sx-shell .sx-meter b{font-size:17px}#sx-shell .sx-meter span{font-size:10px}#sx-shell .sx-tag{font-size:10px}#sx-shell #sx-info{font-size:13px}}
+</style>
+</head>
+<body>
+<main id="sx-shell" aria-label="聖夜のえんとつ便">
+<div class="sx-ticket">
+<div class="sx-stripe" aria-hidden="true"></div>
+<header class="sx-header"><div><p class="sx-tag">北極郵便局　夜間配達便</p><h1>聖夜のえんとつ便</h1></div><button type="button" id="sx-audio" aria-pressed="false">音：切</button></header>
+<div class="sx-stage"><canvas id="sx-screen" width="384" height="200" tabindex="0" role="button" aria-label="そりで出発・贈り物を投下する"></canvas></div>
+<div class="sx-hud" aria-label="配達状況">
+<div class="sx-meter"><span>お届け先</span><b id="sx-count">1 / 10</b></div>
+<div class="sx-meter"><span>スコア</span><b id="sx-score">0</b></div>
+<div class="sx-meter"><span>最高記録</span><b id="sx-best">0</b></div>
+</div>
+<div class="sx-lower"><div role="status" aria-live="polite" aria-atomic="true"><h2 id="sx-notice">十軒の煙突に、贈り物を。</h2><p id="sx-info">金色の星は、今落とすと届く場所。煙突の口が星に重なる瞬間を狙おう。</p></div><button type="button" id="sx-act">そりで出発</button></div>
+<div class="sx-manual"><p>画面をタップ ／ スペースキーで操作</p><button type="button" id="sx-pause" hidden>一時停止</button></div>
+</div>
+</main>
+<script>
+(() => {
+'use strict';
+
+// Town scenery is built once on small pixel canvases; only the scroll offsets change.
+const snowArtLayers = {};
+function snowArtCanvas(w, h) {
+  const canvas = document.createElement('canvas');
+  canvas.width = w;
+  canvas.height = h;
+  return canvas;
+}
+function snowArtRect(c, color, x, y, w = 1, h = 1) {
+  c.fillStyle = color;
+  c.fillRect(Math.round(x), Math.round(y), w, h);
+}
+function snowArtPoly(c, color, points) {
+  // Scan-converted polygons keep even the long snowy diagonals on the pixel grid.
+  const ys = points.map(v => v[1]);
+  c.fillStyle = color;
+  for (let y = Math.min(...ys); y < Math.max(...ys); y++) {
+    const cuts = [];
+    for (let j = 0; j < points.length; j++) {
+      const a = points[j], b = points[(j + 1) % points.length], line = y + 0.5;
+      if ((a[1] <= line && b[1] > line) || (b[1] <= line && a[1] > line)) {
+        cuts.push(a[0] + (line - a[1]) * (b[0] - a[0]) / (b[1] - a[1]));
+      }
+    }
+    cuts.sort((a, b) => a - b);
+    for (let j = 0; j + 1 < cuts.length; j += 2) {
+      const left = Math.ceil(cuts[j]);
+      c.fillRect(left, y, Math.ceil(cuts[j + 1]) - left, 1);
+    }
+  }
+}
+function snowArtHash(n) {
+  const x = Math.sin(n * 127.1 + 19.17) * 43758.5453;
+  return x - Math.floor(x);
+}
+function snowArtFir(c, x, base, height, palette) {
+  const h = height, w = Math.max(4, Math.round(h * .28));
+  const r = (v) => Math.round(v);
+  snowArtRect(c, palette[0], x-1, base-r(h*.18), 3, r(h*.18)+1);
+  for (let i=3; i>=0; i--) {
+    const tip = base - h + r(h*i*.15);
+    const foot = base - r(h * (.52 - i*.15));
+    const spread = r(w * (.34 + i*.22));
+    snowArtPoly(c, palette[0], [[x,tip],[x+spread,foot-2],[x+spread+1,foot],[x+r(spread*.37),foot-1],[x+2,foot+2],[x-r(spread*.3),foot],[x-spread,foot+1]]);
+    snowArtPoly(c, palette[1], [[x,tip],[x+1,tip+3],[x-r(spread*.25),foot-4],[x+2,foot-5],[x-r(spread*.3),foot-1],[x-r(spread*.44),foot-2],[x-spread,foot+1]]);
+  }
+}
+function snowArtStars(c, x, y, color) {
+  snowArtRect(c,color,x-2,y,5,1);
+  snowArtRect(c,color,x,y-2,1,5);
+  snowArtRect(c,'#fff6ca',x,y);
+}
+function snowArtSkyBase() {
+  const cv = snowArtCanvas(384,200), c = cv.getContext('2d');
+  const stops = [[0,[17,25,61]],[48,[36,55,97]],[89,[78,103,141]],[116,[151,153,171]],[148,[220,179,170]],[199,[141,169,180]]];
+  for(let y=0;y<200;y++) {
+    let k=0;
+    while(k+1<stops.length-1 && y>stops[k+1][0]) k++;
+    const [a,v]=stops[k], [b,w]=stops[k+1], f=(y-a)/(b-a);
+    const rgb=v.map((n,i)=>Math.round(n+(w[i]-n)*f));
+    snowArtRect(c,'rgb('+rgb.join(',')+')',0,y,384,1);
+  }
+  for(let i=0;i<111;i++) {
+    const x=Math.floor(snowArtHash(i+6)*384), y=Math.floor(snowArtHash(i+303)*110);
+    if ((x-308)**2+(y-35)**2 < 340) continue;
+    snowArtRect(c,i%5===0?'#ebdab9':i%4===0?'#a6bbd3':'#7584a6',x,y,i%19===0?2:1,1);
+  }
+  [[35,20],[191,29],[259,10],[364,55],[95,58]].forEach(([x,y])=>snowArtStars(c,x,y,'#aebed6'));
+  const moon=(radius,col)=>{
+    for(let dy=-radius;dy<=radius;dy++){
+      const rx=Math.floor(Math.sqrt(radius*radius-dy*dy));
+      snowArtRect(c,col,308-rx,34+dy,rx*2+1,1);
+    }
+  };
+  moon(17,'#435579');moon(14,'#8494aa');moon(13,'#eacfa0');moon(12,'#fff0bf');
+  [[301,27,3,1],[306,25,4,1],[300,32,2,3],[314,29,3,2],[303,39,4,2],[311,41,3,1]].forEach(([x,y,w,h])=>snowArtRect(c,'#e7cfa2',x,y,w,h));
+  for (let i=0;i<5;i++) {
+    const x=[6,74,204,289,328][i], y=[72,88,62,52,83][i];
+    snowArtRect(c,'#8696af',x,y,19+i*4,1);
+    snowArtRect(c,'#7186a6',x+6,y-2,18,2);
+    snowArtRect(c,'#a4a6b8',x+21,y+1,17,1);
+  }
+  return cv;
+}
+function snowArtMountainLayer() {
+  const cv=snowArtCanvas(768,200), c=cv.getContext('2d');
+  const peaks=[[8,109,53],[78,96,69],[145,109,55],[193,94,65],[256,105,66],[327,97,65],[403,107,64],[476,94,59],[543,103,55],[619,91,73],[689,104,62],[748,112,55]];
+  for(const off of [-768,0,768]) for(const [p,y,w] of peaks) {
+    const x=p+off, base=151;
+    snowArtPoly(c,'#91a1b5',[[x-w,base],[x-17,y+14],[x,y],[x+9,y+9],[x+15,y+10],[x+w,base]]);
+    snowArtPoly(c,'#6f87a2',[[x,y],[x+12,y+14],[x+9,y+17],[x+17,y+23],[x+21,y+22],[x+w,base],[x+25,base],[x+2,y+12]]);
+    snowArtPoly(c,'#d1c6c4',[[x-20,y+18],[x-2,y+1],[x,y],[x+12,y+14],[x+6,y+11],[x+3,y+12],[x-2,y+7],[x-6,y+12],[x-7,y+10]]);
+  }
+  for(let i=0;i<192;i++) {
+    const x=i*4, h=Math.floor(9+snowArtHash(i+3)*13), base=140+Math.round(Math.sin(x/34)*3);
+    snowArtPoly(c,'#63839a',[[x-5,base],[x,base-h],[x+6,base]]);
+    snowArtRect(c,'#63839a',x,base-1,4,62);
+  }
+  return cv;
+}
+function snowArtVillageLayer() {
+  const cv=snowArtCanvas(768,200), c=cv.getContext('2d');
+  snowArtRect(c,'#6b889a',0,158,768,42);
+  const roofs=['#576d83','#6a7086','#596c80'];
+  for(let i=0;i<42;i++){
+    const x=i*19-5, y=133+Math.floor(snowArtHash(i)*18);
+    const w=13+Math.floor(snowArtHash(i+120)*11), peak=y-5-Math.floor(snowArtHash(i+80)*7);
+    snowArtRect(c,'#60798c',x+1,y,w-2,180-y);
+    snowArtRect(c,'#586e80',x+2,peak+1,3,9);
+    snowArtRect(c,'#c5cdda',x+1,peak,4,2);
+    snowArtPoly(c,roofs[i%3],[[x-2,y+1],[x+w-3,peak],[x+w+1,y+1]]);
+    snowArtPoly(c,'#c7d2d9',[[x-2,y],[x+w-3,peak-2],[x+w+2,y],[x+w-2,y],[x+w-4,peak+1],[x+4,y+1]]);
+    for(let j=0;j<3;j++) snowArtRect(c,(i+j)%4?'#d2af90':'#ffdb98',x+3+j*5,y+3,2,3);
+  }
+  for(const x of [126,480,691]){
+    snowArtRect(c,'#465c72',x-4,117,9,36);
+    snowArtPoly(c,'#45576d',[[x-7,118],[x-3,115],[x-3,112],[x,105],[x+3,112],[x+3,115],[x+7,118]]);
+    snowArtRect(c,'#ddc6a2',x-2,120,4,5);
+    snowArtRect(c,'#465c72',x,120,1,5);
+    snowArtRect(c,'#c0c5cf',x,99,1,9);
+  }
+  for(let i=0;i<24;i++){
+    const x=i*33+15, base=167+Math.round(snowArtHash(i+30)*5);
+    snowArtFir(c,x,base,19+Math.round(snowArtHash(i+60)*14),['#3b6175','#7c9aaa']);
+  }
+  for(const x of [195,410,672]){
+    const base=177,h=61;
+    snowArtFir(c,x,base,h,['#244d58','#6b9599']);
+    for(let i=0;i<19;i++){
+      const dy=12+i*2, half=dy*.23;
+      const xx=x+Math.round((snowArtHash(i+97)*2-1)*half);
+      snowArtRect(c,['#ffca79','#f88c78','#d9e8bf','#f7db88'][i%4],xx,base-h+dy,2,2);
+    }
+    snowArtStars(c,x,base-h-1,'#ffe7a4');
+    snowArtRect(c,'#879fac',x-20,base+1,43,2);
+  }
+  for(let x=0;x<768;x++){
+    const bank=181+Math.round(3*Math.sin(x*Math.PI/96)+2*Math.cos(x*Math.PI/64));
+    snowArtRect(c,'#b8c8cd',x,bank,1,200-bank);
+    snowArtRect(c,'#d2dcd9',x,bank,1,2);
+    if(x%47===2 || x%47===3) snowArtRect(c,'#90a9b5',x,bank+7,3,1);
+  }
+  for(const x of [11,254,518,715]){
+    snowArtRect(c,'#708993',x,178,25,2);
+    for(let j=0;j<4;j++){
+      snowArtRect(c,'#6c8291',x+j*8,175,2,9);
+      snowArtRect(c,'#d2d9d6',x+j*8-1,175,4,1);
+    }
+  }
+  return cv;
+}
+function paintSantaSky(ctx,t,scroll) {
+  if(!snowArtLayers.sky){
+    snowArtLayers.sky=snowArtSkyBase();
+    snowArtLayers.mountains=snowArtMountainLayer();
+    snowArtLayers.village=snowArtVillageLayer();
+  }
+  ctx.save();
+  ctx.imageSmoothingEnabled=false;
+  ctx.drawImage(snowArtLayers.sky,0,0);
+  for(const [layer,speed] of [[snowArtLayers.mountains,.12],[snowArtLayers.village,.29]]) {
+    const x=((Math.floor(scroll*speed)%768)+768)%768;
+    ctx.drawImage(layer,-x,0);
+    if(x+384>768) ctx.drawImage(layer,768-x,0);
+  }
+  for(let i=0;i<39;i++){
+    const speed=3+i%4, x=(snowArtHash(i+42)*394+Math.sin(i+t*.45)*2-.05*scroll)%394;
+    const y=(snowArtHash(i+172)*202+t*speed)%202;
+    snowArtRect(ctx,i%3?'#bbc8d6':'#e4e1d8',Math.floor((x+394)%394)-3,Math.floor(y),i%11===0?2:1,1);
+  }
+  ctx.restore();
+}
+function snowArtWindow(c,x,y,w,h,lit,frame) {
+  snowArtRect(c,'#223343',x-2,y-2,w+4,h+5);
+  snowArtRect(c,frame,x-1,y-1,w+2,h+2);
+  snowArtRect(c,lit?'#e99846':'#da9356',x,y,w,h);
+  snowArtRect(c,lit?'#ffed9e':'#ffd08a',x+1,y+1,w-2,Math.floor(h*.55));
+  snowArtRect(c,lit?'#ffda78':'#efac66',x+2,y+Math.floor(h*.55),w-4,Math.ceil(h*.45)-1);
+  snowArtRect(c,'#755047',x+Math.floor(w/2),y,1,h);
+  snowArtRect(c,'#755047',x,y+Math.floor(h/2),w,1);
+  snowArtRect(c,'#b4cbd1',x-3,y+h+1,w+6,2);
+}
+function paintSantaHouse(ctx,chimX,top,kind,lit,opening) {
+  const variant = Math.abs(Math.trunc(kind)||0)%4, key=[variant,top,opening,lit?1:0].join('/');
+  if(!snowArtLayers.houses) snowArtLayers.houses=new Map();
+  let pic=snowArtLayers.houses.get(key);
+  if(!pic){
+    pic=snowArtCanvas(128,148);
+    const c=pic.getContext('2d'), x=64, y=2, r=snowArtRect, p=snowArtPoly;
+    const dx=[-7,9,-4,4][variant], left=x-49+dx, right=left+99, ridge=left+[32,63,39,56][variant], roofY=y+23, eaves=roofY+22;
+    const wall=['#994f47','#517b75','#a57956','#70738a'][variant];
+    const shade=['#733c3e','#3c5c60','#785745','#51556b'][variant];
+    const roof=['#6e454d','#3a5860','#784e47','#51566a'][variant];
+    const beam=['#673f3e','#365157','#6d4d40','#43475d'][variant];
+    const brick=['#ad6050','#97766b','#ad6754','#907377'][variant];
+    r(c,shade,left+1,eaves-2,97,150);
+    r(c,wall,left+4,eaves,86,148);
+    for(let j=0;j<12;j++)r(c,shade,left+6,eaves+4+j*7,82,1);
+    r(c,beam,left+4,eaves+4,3,100);r(c,beam,right-12,eaves+4,3,100);
+    p(c,roof,[[left-5,eaves],[ridge-4,roofY],[ridge+20,roofY],[right+4,eaves],[right+4,eaves+4],[left-5,eaves+4]]);
+    p(c,'#a5bdc9',[[left-6,eaves-1],[ridge-4,roofY-2],[ridge+20,roofY-2],[right+5,eaves-1],[right+5,eaves+2],[right-4,eaves+2],[right-4,eaves+5],[right-6,eaves+5],[right-6,eaves+2],[left-6,eaves+2]]);
+    p(c,'#eff0e5',[[left-6,eaves-2],[ridge-5,roofY-3],[ridge+21,roofY-3],[right+5,eaves-2],[right+3,eaves],[left-5,eaves]]);
+    p(c,'#c5d5d7',[[ridge+1,roofY+2],[ridge+18,roofY+1],[right-8,eaves-3],[right-20,eaves-3]]);
+    for(let j=0;j<9;j++){
+      const xx=left+j*11, yy=eaves+3;
+      r(c,'#3d484d',xx,yy,11,1);
+      r(c,['#ffbd75','#e97b6d','#a3c6ac'][j%3],xx+2,yy+1,2,2);
+    }
+    // Front gable and a dormer, with a snowy edge and illuminated attic pane.
+    const gx=variant%2?left+25:right-23, gy=eaves-13;
+    p(c,shade,[[gx-10,gy+8],[gx,gy-2],[gx+10,gy+8],[gx+9,gy+14],[gx-9,gy+14]]);
+    p(c,'#e4e6dd',[[gx-12,gy+7],[gx,gy-5],[gx+12,gy+7],[gx+10,gy+9],[gx,gy-1],[gx-10,gy+9]]);
+    snowArtWindow(c,gx-3,gy+5,6,6,lit,beam);
+    snowArtWindow(c,left+13,eaves+12,16,16,lit,beam);
+    snowArtWindow(c,right-33,eaves+12,16,16,lit,beam);
+    r(c,beam,left+40,eaves+13,15,58);r(c,shade,left+43,eaves+16,10,40);
+    r(c,'#e3a95f',left+49,eaves+31,2,2);
+    r(c,'#426d64',left+44,eaves+18,7,7);r(c,shade,left+46,eaves+20,3,3);r(c,'#d9765e',left+47,eaves+24,4,2);
+    const half=Math.floor(opening/2), a=x-half, w=Math.round(opening);
+    r(c,'#593f43',a-1,y+4,w+3,roofY-y+7);
+    r(c,brick,a+1,y+4,w-2,roofY-y+7);
+    for(let j=0;j<5;j++){
+      const yy=y+8+j*4;
+      r(c,'#845451',a+1,yy,w-2,1);
+      for(let k=j%2?3:8;k<w-1;k+=10)r(c,'#845451',a+k,yy-3,1,3);
+    }
+    r(c,'#453a47',a-3,y+1,w+6,5);
+    r(c,'#bed0cf',a-4,y,w+8,2);
+    r(c,'#fff2db',a-3,y-1,w+6,2);
+    r(c,'#522e37',a,y-1,w,3);
+    r(c,lit?'#e79656':'#955750',a+1,y+1,w-2,1);
+    r(c,'#fff2db',a-4,y-1,3,3);r(c,'#fff2db',a+w+1,y-1,3,3);
+    if(snowArtLayers.houses.size>64) snowArtLayers.houses.clear();
+    snowArtLayers.houses.set(key,pic);
+  }
+  ctx.save();ctx.imageSmoothingEnabled=false;
+  ctx.drawImage(pic,Math.round(chimX)-64,Math.round(top)-2);
+  ctx.restore();
+}
+function snowArtLine(c,x0,y0,x1,y1,color) {
+  x0=Math.round(x0);y0=Math.round(y0);x1=Math.round(x1);y1=Math.round(y1);
+  const dx=Math.abs(x1-x0), sx=x0<x1?1:-1, dy=-Math.abs(y1-y0), sy=y0<y1?1:-1;
+  let err=dx+dy;
+  c.fillStyle=color;
+  while(true){
+    c.fillRect(x0,y0,1,1);
+    if(x0===x1&&y0===y1)break;
+    const e=2*err;
+    if(e>=dy){err+=dy;x0+=sx;}
+    if(e<=dx){err+=dx;y0+=sy;}
+  }
+}
+function snowArtDeer(c,x,y,phase) {
+  c.save();c.translate(x,y);
+  const r=(col,x,y,w=1,h=1)=>snowArtRect(c,col,x,y,w,h);
+  const p=(col,points)=>snowArtPoly(c,col,points);
+  const line=(x,y,xx,yy,col)=>snowArtLine(c,x,y,xx,yy,col);
+  const dark='#513b40', coat='#c48754', light='#e6b884', hoof='#393342';
+  const spread=phase?2:-1;
+  line(-6,0,-9,4,dark);line(-9,4,-13+spread,3,dark);r(hoof,-14+spread,2,2,2);
+  line(4,0,7,4,dark);line(7,4,10+spread,3,dark);r(hoof,10+spread,2,2,2);
+  line(-5,0,-7,6,light);line(-7,6,-11-spread,8,light);r(hoof,-12-spread,8,2,2);
+  line(5,0,8,3,light);line(8,3,11-spread,0,light);r(hoof,11-spread,-1,2,2);
+  p(dark,[[-10,-5],[-7,-7],[1,-7],[4,-11],[6,-13],[10,-12],[10,-9],[13,-7],[14,-5],[9,-4],[7,-5],[6,0],[3,2],[-6,2],[-10,0]]);
+  p(coat,[[-9,-5],[-6,-6],[2,-6],[5,-11],[8,-12],[9,-9],[12,-7],[12,-6],[8,-6],[6,-7],[5,0],[2,1],[-6,0],[-9,-1]]);
+  r(light,-7,-5,8,1);r(light,6,-10,3,2);r(light,8,-7,4,2);r('#302936',8,-10);
+  r('#e78368',12,-7,2,2);r('#ffe7bd',12,-7);r('#edd6b3',-12,-6,3,2);
+  r(light,2,-12,3,2);
+  line(6,-13,3,-16,'#e1b880');line(3,-16,2,-20,'#e1b880');line(3,-16,0,-17,'#e1b880');r('#e1b880',0,-19,1,3);
+  line(7,-13,9,-17,'#f1cc94');line(9,-17,12,-19,'#f1cc94');r('#f1cc94',12,-21,1,3);r('#f1cc94',8,-20,1,4);
+  r('#a34346',2,-7,2,8);r('#f4c46d',2,-4,2,2);r('#ffdd83',4,0,2,2);
+  c.restore();
+}
+function paintSantaSleigh(ctx,x,y,t) {
+  ctx.save();ctx.translate(Math.round(x),Math.round(y));
+  const r=(col,x,y,w=1,h=1)=>snowArtRect(ctx,col,x,y,w,h);
+  const p=(col,points)=>snowArtPoly(ctx,col,points);
+  const line=(x,y,xx,yy,col)=>snowArtLine(ctx,x,y,xx,yy,col);
+  const phase=Math.floor(t*4)%2, bob=phase?0:1;
+  // The harness dips between the sleigh and the two flying deer.
+  for(const [x0,y0,x1,y1] of [[8,-12,20,-8],[20,-8,38,-10+bob],[39,-10+bob,52,-7],[52,-7,67,-10-bob]]) {
+    line(x0,y0,x1,y1,'#f5c388');
+    line(x0,y0+2,x1,y1+2,'#734e4c');
+  }
+  snowArtDeer(ctx,37,-9+bob,phase);snowArtDeer(ctx,67,-12-bob,1-phase);
+  // A velvet sack with a twisted neck, then Santa holding the reins.
+  p('#5b394b',[[-21,-9],[-23,-14],[-22,-18],[-17,-23],[-16,-26],[-19,-28],[-13,-28],[-11,-24],[-7,-21],[-6,-13],[-10,-9]]);
+  p('#b45b55',[[-20,-10],[-22,-15],[-19,-19],[-16,-22],[-12,-22],[-9,-18],[-9,-11]]);
+  r('#d5856a',-18,-20,4,2);r('#8a414c',-17,-24,6,2);r('#ffd086',-17,-24,5,1);
+  p('#e8c588',[[-22,-14],[-21,-18],[-20,-18],[-21,-14]]);
+  p('#742f42',[[-10,-8],[-10,-16],[-6,-21],[0,-20],[3,-16],[7,-15],[8,-11],[2,-11],[2,-7]]);
+  p('#cf4948',[[-9,-9],[-8,-16],[-5,-19],[-1,-18],[1,-15],[5,-14],[4,-12],[-1,-13],[-1,-9]]);
+  r('#f7dfc1',-8,-11,12,2);r('#453444',-7,-13,9,2);r('#f4bf71',-1,-13,2,2);
+  r('#f0d7b7',-6,-24,8,6);r('#f3af85',-3,-24,6,4);r('#8d4546',1,-23);r('#f3b186',2,-22,2,1);
+  p('#fff1d5',[[-6,-23],[-3,-22],[-3,-20],[0,-20],[2,-21],[2,-18],[-2,-16],[-5,-18],[-6,-20]]);
+  p('#ce484a',[[-12,-23],[-10,-27],[-7,-30],[-4,-30],[-1,-28],[1,-24],[-7,-23],[-8,-25]]);
+  r('#f46959',-7,-28,4,1);r('#ffe9cc',-7,-25,10,2);r('#fff2d6',-13,-24,3,3);
+  r('#f6d3af',4,-15,3,3);r('#543846',7,-15,3,2);
+  // A cranberry-red sleigh, trimmed in gold around its upturned bow.
+  p('#513849',[[-23,-14],[-19,-14],[-16,-10],[8,-10],[12,-12],[13,-16],[16,-16],[16,-11],[13,-4],[8,-2],[-15,-2],[-20,-5]]);
+  p('#a64045',[[-21,-13],[-18,-13],[-15,-9],[9,-9],[13,-12],[14,-15],[15,-15],[14,-10],[11,-5],[7,-3],[-15,-3],[-19,-6]]);
+  p('#dd6654',[[-18,-10],[-15,-8],[8,-8],[12,-10],[10,-7],[7,-6],[-15,-6]]);
+  line(-20,-13,-15,-9,'#f4ca80');r('#f8d98f',-15,-9,24,1);line(9,-9,13,-12,'#f4ca80');r('#ffd58a',14,-16,2,2);
+  r('#e1ac6a',-13,-2,2,3);r('#e1ac6a',6,-2,2,3);
+  r('#d69f66',-19,1,30,1);r('#f8d795',-15,2,26,1);line(10,1,15,-1,'#f8d795');r('#f8d795',15,-3,2,3);
+  ctx.restore();
+}
+
+const shell=document.getElementById('sx-shell');
+const board=document.getElementById('sx-screen');
+const ctx=board.getContext('2d');
+ctx.imageSmoothingEnabled=false;
+const action=document.getElementById('sx-act');
+const audioButton=document.getElementById('sx-audio');
+const pauseButton=document.getElementById('sx-pause');
+const notice=document.getElementById('sx-notice');
+const info=document.getElementById('sx-info');
+const countLabel=document.getElementById('sx-count');
+const scoreLabel=document.getElementById('sx-score');
+const bestLabel=document.getElementById('sx-best');
+const WIDTH=384, HEIGHT=200, DROP_X=128, GRAVITY=182;
+const route=[
+  {gap:265,top:126,width:36,speed:46,wind:0},
+  {gap:172,top:117,width:27,speed:48,wind:0},
+  {gap:179,top:130,width:26,speed:49,wind:8},
+  {gap:173,top:112,width:24,speed:51,wind:-10},
+  {gap:183,top:128,width:24,speed:51,wind:13},
+  {gap:174,top:117,width:22,speed:53,wind:-14},
+  {gap:188,top:132,width:22,speed:54,wind:18},
+  {gap:181,top:110,width:22,speed:55,wind:-17},
+  {gap:175,top:121,width:20,speed:56,wind:14},
+  {gap:181,top:130,width:20,speed:58,wind:-19}
+];
+const giftColors=['#e35047','#5ab8a3','#c379ba','#66afd7'];
+let mode='ready',ticket=0,scroll=0,time=0,previousFrame=0;
+let homes=[],parcel=null,delivery=null,score=0,hits=0,centerHits=0,streak=0;
+let sparks=[],muted=true,synth=null,guideHold=false,best=0;
+const storageKey='santa-express-best-v1';
+try { const saved=Number(localStorage.getItem(storageKey)); if(Number.isSafeInteger(saved)&&saved>0)best=saved; }catch{}
+bestLabel.textContent=String(best);
+function makeStreet(){
+  let pos=0;
+  return route.map((spec,i)=>{pos+=spec.gap;return {...spec,x:pos,kind:i%4,lit:false};});
+}
+function say(head,body){notice.textContent=head;info.textContent=body;}
+function updateHud(){
+  countLabel.textContent=(ticket+1)+' / '+route.length;
+  scoreLabel.textContent=String(score);
+  bestLabel.textContent=String(best);
+}
+function flightY(){return 50+Math.sin(time*2.7)*1.5;}
+function dropMark(h){
+  const fallTime=Math.sqrt(2*(h.top-flightY())/GRAVITY);
+  return DROP_X+(h.speed+h.wind)*fallTime;
+}
+function ring(notes){
+  if(muted||!synth)return;
+  try{
+    notes.forEach(([freq,start,len])=>{
+      const osc=synth.createOscillator(),gain=synth.createGain();
+      const at=synth.currentTime+start;
+      osc.type='triangle';osc.frequency.value=freq;
+      gain.gain.setValueAtTime(.0001,at);
+      gain.gain.exponentialRampToValueAtTime(.085,at+.013);
+      gain.gain.exponentialRampToValueAtTime(.0001,at+len);
+      osc.connect(gain);gain.connect(synth.destination);
+      osc.start(at);osc.stop(at+len+.01);
+    });
+  }catch{}
+}
+audioButton.addEventListener('click',async()=>{
+  if(!muted){muted=true;if(synth)await synth.suspend().catch(()=>{});}
+  else {
+    const Audio=window.AudioContext||window.webkitAudioContext;
+    if(!Audio){audioButton.textContent='音：利用不可';return;}
+    try{if(!synth)synth=new Audio();await synth.resume();muted=false;ring([[784,0,.15]]);}catch{audioButton.textContent='音：利用不可';return;}
+  }
+  audioButton.textContent=muted?'音：切':'音：入';
+  audioButton.setAttribute('aria-pressed',String(!muted));
+});
+function presentTarget(){
+  const h=homes[ticket];
+  const wind=h.wind===0?'無風。':h.wind>0?'風は右向き。':'風は左向き。';
+  say(ticket===0?'最初は金の星を目印に。':(ticket+1)+'軒目　'+wind,
+    ticket===0?'最初の煙突が星に重なると、そりが待ってくれる。': '煙突の口が星に重なったら投下。中央に入ればぴったり賞！');
+  action.textContent='贈り物を落とす';
+}
+function launch(){
+  mode='play';ticket=0;scroll=0;score=0;hits=0;centerHits=0;streak=0;
+  parcel=null;delivery=null;sparks=[];guideHold=false;homes=makeStreet();
+  pauseButton.hidden=false;updateHud();presentTarget();
+  ring([[523,0,.10],[659,.09,.12],[784,.18,.20]]);
+}
+function finish(){
+  mode='end';pauseButton.hidden=true;
+  const improved=score>best;best=Math.max(best,score);
+  try{localStorage.setItem(storageKey,String(best));}catch{}
+  updateHud();
+  say(improved?'配達完了！　最高記録更新':'聖夜の配達、おつかれさま！',
+    '十軒のうち '+hits+' 軒にお届け。ぴったり賞 '+centerHits+' 回、合計 '+score+' 点。');
+  action.textContent='もう一便、出発';
+  ring([[523,0,.18],[659,.12,.18],[784,.24,.18],[1047,.4,.4]]);
+}
+function setPause(){
+  if(mode!=='play')return;
+  mode='pause';pauseButton.hidden=true;
+  if(synth&&!muted)synth.suspend().catch(()=>{});
+  say('配達を一時停止','もう一度押すと、同じ煙突から配達を再開します。');
+  action.textContent='配達を再開';
+}
+function mainAction(){
+  if(mode==='ready'||mode==='end'){launch();return;}
+  if(mode==='pause'){
+    mode='play';pauseButton.hidden=false;previousFrame=0;
+    if(synth&&!muted)synth.resume().catch(()=>{});
+    if(delivery)reportDelivery();else if(parcel){say('贈り物が落下中…','煙突に届くまで見届けよう。');action.textContent='落下中…';}
+    else presentTarget();
+    return;
+  }
+  if(parcel||delivery)return;
+  const h=homes[ticket],startY=flightY();guideHold=false;
+  parcel={age:0,startY,x0:DROP_X,fall:Math.sqrt(2*(h.top-startY)/GRAVITY),wind:h.wind,releaseScroll:scroll};
+  say('贈り物が落下中…','煙突に届くまで見届けよう。');action.textContent='落下中…';
+  ring([[659,0,.07],[523,.08,.10]]);
+}
+function reportDelivery(){
+  const d=delivery;
+  const title=d.ok?(d.perfect?'ぴったり！':'お届け成功！')+'　＋'+d.points+' 点':'惜しい！';
+  const detail=d.ok?(streak>1?streak+' 軒連続でお届け。':'雪の屋根の下、暖かな窓が輝いた。'):d.reason;
+  say(title,detail);action.textContent='次の煙突へ…';
+}
+function resolve(ok,perfect,reason){
+  const h=homes[ticket];
+  if(ok){streak++;hits++;if(perfect)centerHits++;h.lit=true;}
+  else streak=0;
+  const points=ok?(perfect?150:90)+Math.min(5,streak-1)*15:0;
+  score+=points;delivery={age:0,ok,perfect,points,reason};parcel=null;
+  updateHud();reportDelivery();
+  if(ok){
+    for(let i=0;i<16;i++){
+      const angle=(i+.5)*Math.PI/16;
+      sparks.push({worldX:h.x,y:h.top-4,vx:Math.cos(angle)*(19+i%4*4),vy:-Math.sin(angle)*36-8,age:0});
+    }
+    ring(perfect?[[660,0,.13],[880,.09,.13],[1175,.19,.24]]:[[660,0,.13],[880,.13,.18]]);
+  }else ring([[247,0,.14],[196,.16,.19]]);
+}
+function advance(dt){
+  let h=homes[ticket];
+  if(!guideHold)scroll+=h.speed*dt;
+  const mouth=h.x-scroll;
+  if(!parcel&&!delivery){
+    if(ticket===0){
+      const mark=dropMark(h);
+      if(mouth<=mark || guideHold){
+        scroll=h.x-mark;
+        if(!guideHold){guideHold=true;say('いま！　贈り物を落とそう','金の星と煙突が重なった。画面かボタンを一度押そう。');}
+      }
+    }else if(mouth<dropMark(h)-h.width/2-15){
+      resolve(false,false,'煙突が星を通り過ぎた。次は少し早めに。');
+    }
+  }else if(parcel){
+    parcel.age+=dt;
+    if(parcel.age>=parcel.fall){
+      const giftX=parcel.x0+parcel.wind*parcel.fall;
+      const rimX=h.x-parcel.releaseScroll-h.speed*parcel.fall;
+      const error=giftX-rimX;
+      resolve(Math.abs(error)<=h.width/2,Math.abs(error)<=h.width*.19,error<0?'少し早かった。次は煙突をもう少し引きつけよう。':'少し遅かった。次は煙突が手前に来たら落とそう。');
+    }
+  }else if(delivery){
+    delivery.age+=dt;
+    if(delivery.age>1.05){
+      if(ticket===homes.length-1){finish();return;}
+      ticket++;delivery=null;presentTarget();updateHud();
+    }
+  }
+  for(const p of sparks){p.age+=dt;p.worldX+=p.vx*dt;p.y+=p.vy*dt;p.vy+=50*dt;}
+  sparks=sparks.filter(p=>p.age<.8);
+}
+function paintStar(x,y,bright){
+  x=Math.round(x);y=Math.round(y);
+  ctx.fillStyle='#4e3740';ctx.fillRect(x-2,y-6,5,13);ctx.fillRect(x-6,y-2,13,5);
+  ctx.fillStyle=bright?'#fff4ba':'#ffcd72';ctx.fillRect(x,y-5,1,11);ctx.fillRect(x-5,y,11,1);
+  ctx.fillRect(x-2,y-2,5,5);ctx.fillStyle='#fff4c3';ctx.fillRect(x-1,y-1,3,3);
+}
+function paintBox(x,y,palette){
+  x=Math.round(x);y=Math.round(y);
+  ctx.fillStyle='#4b3744';ctx.fillRect(x-5,y-8,11,9);
+  ctx.fillStyle=palette;ctx.fillRect(x-4,y-7,9,7);
+  ctx.fillStyle='#ffe091';ctx.fillRect(x-1,y-7,2,7);ctx.fillRect(x-5,y-7,11,2);
+  ctx.fillRect(x-3,y-10,2,2);ctx.fillRect(x+1,y-10,2,2);
+}
+function paint(){
+  const h=homes[ticket];
+  paintSantaSky(ctx,time,scroll);
+  for(let i=-2;i<0;i++){
+    const x=84+i*146-scroll;
+    if(x>-68&&x<WIDTH+68)paintSantaHouse(ctx,x,129+i*4,3+i,false,17);
+  }
+  for(const home of homes){
+    const x=home.x-scroll;
+    if(x>-75&&x<WIDTH+75)paintSantaHouse(ctx,x,home.top,home.kind,home.lit,home.width);
+  }
+  if(scroll<145)paintSantaHouse(ctx,52-scroll,131,3,false,19);
+  const marker=dropMark(h);
+  if(!parcel&&!delivery&&mode!=='end'){
+    ctx.save();
+    const active=Math.abs(h.x-scroll-marker)<h.width/2;
+    const y=h.top-12;
+    ctx.fillStyle=active?'#fff2af':'#f7c93e';
+    for(let k=3;k<=8;k+=3)ctx.fillRect(Math.round(marker),Math.round(y+k),1,2);
+    paintStar(marker,y,active);ctx.restore();
+  }
+  const y=flightY();paintSantaSleigh(ctx,DROP_X,y,time);
+  if(!parcel&&!delivery&&mode!=='end')paintBox(DROP_X,y+4,giftColors[ticket%giftColors.length]);
+  if(parcel){const a=parcel.age;paintBox(parcel.x0+parcel.wind*a,parcel.startY+GRAVITY*a*a/2,giftColors[ticket%giftColors.length]);}
+  for(const p of sparks){
+    ctx.fillStyle=p.age<.45?'#fff4ad':'#edb559';
+    ctx.fillRect(Math.round(p.worldX-scroll),Math.round(p.y),2,2);
+  }
+  if(delivery&&delivery.age<.98){
+    const x=Math.max(28,Math.min(WIDTH-28,h.x-scroll));
+    const text=delivery.ok?'+'+delivery.points:'MISS';
+    ctx.font='bold 11px monospace';ctx.textAlign='center';
+    ctx.fillStyle='#29424b';ctx.fillText(text,Math.round(x+1),Math.round(h.top-10-delivery.age*11)+1);
+    ctx.fillStyle=delivery.ok?'#ffe49e':'#fce0d4';ctx.fillText(text,Math.round(x),Math.round(h.top-10-delivery.age*11));ctx.textAlign='start';
+  }
+  // Foreground flakes are sparse enough to keep the chimney lip and parcel visible.
+  for(let i=0;i<24;i++){
+    const xx=((i*73+Math.sin(time*.7+i)*3-time*(4+i%3))%WIDTH+WIDTH)%WIDTH;
+    const yy=(i*37+time*(5+i%4))%HEIGHT;
+    ctx.fillStyle=i%3?'#cfdfdc':'#fff2d8';ctx.fillRect(Math.floor(xx),Math.floor(yy),1,i%7?1:2);
+  }
+}
+function frame(stamp){
+  const dt=previousFrame?Math.min(.045,(stamp-previousFrame)/1000):0;
+  previousFrame=stamp;
+  if(!document.hidden&&shell.getClientRects().length){
+    if(mode==='play'){time+=dt;advance(dt);}
+    else if(mode==='ready'&&!window.matchMedia('(prefers-reduced-motion: reduce)').matches)time+=dt*.55;
+    paint();
+  }else if(mode==='play'){setPause();}
+  requestAnimationFrame(frame);
+}
+document.addEventListener('visibilitychange',()=>{if(document.hidden)setPause();previousFrame=0;});
+pauseButton.addEventListener('click',setPause);
+board.addEventListener('click',mainAction);
+action.addEventListener('click',mainAction);
+document.addEventListener('keydown',e=>{
+  if(e.altKey||e.metaKey||e.ctrlKey||document.hidden||!shell.getClientRects().length)return;
+  const target=e.target;
+  if(target===audioButton||target===pauseButton)return;
+  if(target&&target.closest&&target.closest('button,input,textarea,select,a')&&!shell.contains(target))return;
+  if(e.code==='Space'||e.key===' '||(e.key==='Enter'&&target===board)){
+    e.preventDefault();if(!e.repeat)mainAction();
+  }
+});
+homes=makeStreet();paint();requestAnimationFrame(frame);
+})();
+</script>
+</body>
+</html>
