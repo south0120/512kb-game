@@ -29,7 +29,7 @@ const SW = [rot(SWORD, 2), SWORD, rot(SWORD, 3), rot(SWORD, 1)];   // した う
 const DX = [0, 0, -1, 1], DY = [1, -1, 0, 0];
 
 // ---------- おと ----------
-let AC, mute = 0, song = -1, step = 0, nextT = 0, hush = 0, NB;
+let AC, awake = 0, mute = 0, song = -1, step = 0, nextT = 0, hush = 0, NB;
 const tracks = SONGS.map(s => s.slice(1).map((t, v) => {
   const o = [];
   for (const m of t.matchAll(/([A-Ga-g])(#?)('?)|([-.])/g)) {
@@ -77,6 +77,7 @@ function ainit() {
     setInterval(seq, 50);
   } catch (e) { }
   AC && AC.state != 'running' && AC.resume();
+  if (!awake) try { awake = 1; navigator.wakeLock && navigator.wakeLock.request('screen').catch(() => { }); } catch (e) { }
 }
 const music = n => { if (n != song) { song = n; step = 0; nextT = 0; } };
 // じゅんに ならす みじかい ふし (おんがくは そのあいだ とめる)
@@ -118,11 +119,31 @@ function press(k, on) {
 const KM = { ArrowUp: 'U', ArrowDown: 'D', ArrowLeft: 'L', ArrowRight: 'R', w: 'U', s: 'D', a: 'L', d: 'R', z: 'A', ' ': 'A', Enter: 'A', x: 'B', c: 'M', Escape: 'M', m: 'N' };
 onkeydown = e => { const k = KM[e.key]; if (k) { e.preventDefault(); press(k, 1); } };
 onkeyup = e => press(KM[e.key], 0);
+// ---------- スマホの そうさ ----------
+// ボタン: ゆびを はなすまで おしっぱなし
 document.querySelectorAll('[data-k]').forEach(b => {
-  const k = b.dataset.k;
-  b.onpointerdown = e => { e.preventDefault(); press(k, 1); };
-  b.onpointerup = b.onpointercancel = b.onpointerleave = () => press(k, 0);
+  const k = b.dataset.k, up = () => { b.classList.remove('on'); press(k, 0); };
+  b.onpointerdown = e => { e.preventDefault(); try { b.setPointerCapture(e.pointerId); } catch (x) { } b.classList.add('on'); press(k, 1); };
+  b.onpointerup = b.onpointercancel = up;
 });
+// じゅうじキー: まるの なかで ゆびを すべらせると むきが かわる (ななめも できる)
+const pad = document.getElementById('d'), knob = pad.firstChild;
+const steer = e => {
+  const r = pad.getBoundingClientRect(), x = e ? e.clientX - r.left - r.width / 2 : 0, y = e ? e.clientY - r.top - r.height / 2 : 0, dz = r.width * .12, ax = Math.abs(x), ay = Math.abs(y);
+  const L = x < -dz && ax > ay * .42, Rt = x > dz && ax > ay * .42, Up = y < -dz && ay > ax * .42, Dn = y > dz && ay > ax * .42;
+  press('L', L); press('R', Rt); press('U', Up); press('D', Dn);
+  pad.classList.toggle('on', L || Rt || Up || Dn);
+  knob.style.transform = `translate(${(Rt - L) * 70}%,${(Dn - Up) * 70}%)`;
+};
+let padId = -1;
+pad.onpointerdown = e => { e.preventDefault(); padId = e.pointerId; try { pad.setPointerCapture(padId); } catch (x) { } steer(e); };
+pad.onpointermove = e => e.pointerId == padId && steer(e);
+pad.onpointerup = pad.onpointercancel = e => { if (e.pointerId == padId) { padId = -1; steer(); } };
+// がめんを タップ: かいわを おくる
+cv.onpointerdown = e => { if (dlg || scene) { e.preventDefault(); press('A', 1); press('A', 0); } };
+oncontextmenu = e => e.preventDefault();
+// がめんを はなれたら おとを とめ、セーブする
+document.onvisibilitychange = () => { if (AC) document.hidden ? AC.suspend() : AC.resume(); document.hidden && G && G.c && save(); };
 const key = () => new Promise(r => keyRes = r);
 const keyA = async () => { while (await key() != 'A'); };
 const isW = c => typeof c == 'string' && c >= '0' && c <= '9';
@@ -659,12 +680,18 @@ const touch = matchMedia('(pointer:coarse)').matches;
 document.getElementById('t').hidden = !touch;
 document.getElementById('h').hidden = touch;
 function fit() {
-  // 1マスを 3の ばいすうに して、もじの そう(1.5ばい)も ぴったり のせる
-  const dpr = devicePixelRatio || 1, s = Math.max(3, (Math.min((innerWidth - 32) / W, (innerHeight - (touch ? 230 : 56)) / H) * dpr / 3 | 0) * 3);
-  cv.width = W * s; cv.height = H * s; cv.style.width = W * s / dpr + 'px';
+  // つかえる ひろさ: たてもちは ボタンが した、よこもちは りょうわき
+  const dpr = devicePixelRatio || 1, side = touch && innerWidth > innerHeight, ctl = document.getElementById('t'), btn = document.getElementById('b');
+  const aw = innerWidth - 32 - (side ? pad.offsetWidth + btn.offsetWidth + 16 : 0), ah = innerHeight - (side ? 16 : touch ? ctl.offsetHeight + 40 : 56);
+  // えの 1ドットを 3の ばいすうに して、もじの そう(1.5ばい)も ぴったり のせる
+  const s = Math.max(3, (Math.min(aw / W, ah / H) * dpr / 3 | 0) * 3);
+  cv.width = W * s; cv.height = H * s;
+  // スマホでは あいた はばを つかいきる (すこし ひきのばす)
+  cv.style.width = (touch ? Math.max(120, Math.min(aw, ah * W / H)) : W * s / dpr) + 'px';
   cx.imageSmoothingEnabled = false;
 }
 onresize = fit; fit();
+screen.orientation && (screen.orientation.onchange = () => setTimeout(fit, 200));
 let last = 0, acc = 0;
 function loop(t) {
   acc += Math.min(100, t - last); last = t;

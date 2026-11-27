@@ -26,11 +26,12 @@ if (min.includes('__FONT__')) {
 const page = `<title>${title}</title>${body}<script>${min}</script>`;
 
 mkdirSync(out, { recursive: true });
-writeFileSync(`${out}/index.html`, `<!doctype html><meta charset=utf-8><meta name=viewport content="width=device-width,initial-scale=1">${page}`);
+const HEAD = '<!doctype html><meta charset=utf-8><meta name=viewport content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover"><meta name=apple-mobile-web-app-capable content=yes><meta name=mobile-web-app-capable content=yes><meta name=theme-color content="#10141f">';
+writeFileSync(`${out}/index.html`, `${HEAD}${page}`);
 // Artifact 公開用 (公開側がひな形で包むので doctype なし)
 writeFileSync(`dist/${name}.artifact.html`, `<meta name="claude:viewport-fit-sides" content="cover">${page}`);
 // 開発用 (未圧縮、デバッグしやすい)
-writeFileSync(`${out}/dev.html`, `<!doctype html><meta charset=utf-8><title>${title}</title>${body}<script>${js}</script>`);
+writeFileSync(`${out}/dev.html`, `${HEAD}<title>${title}</title>${body}<script>${js}</script>`);
 
 rmSync(`dist/${name}.zip`, { force: true });
 execFileSync('zip', ['-9', '-X', '-j', '-q', `dist/${name}.zip`, `${out}/index.html`]);
