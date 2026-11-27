@@ -145,7 +145,7 @@ const save = () => { try { localStorage[KEY] = JSON.stringify(G); } catch (e) { 
 const load = () => { try { const g = JSON.parse(localStorage[KEY]); g.f = g.f || {}; return g.c && g; } catch (e) { } };
 const checkpoint = () => { G.c = [rid, P.x, P.y]; save(); };
 // へやの きおく (セーブは しない): t=かわった マス, d=たおした てきの いた マス, at=へやを でた とき
-// へやを はなれて 90びょう たつか、たおれると もとに もどる
+// へやを はなれて 5ふん たつか、たおれると もとに もどる
 let MEM = {};
 const mem = () => MEM[rid] = MEM[rid] || { t: {}, d: [] };
 function remember() {
@@ -164,7 +164,7 @@ function enter(r) {
   dark = DARK.includes(r);
   E = []; sw = []; shots = []; parts = []; slide = seal = auto = 0; told = {};
   const solved = G.S[r];
-  if (MEM[r] && G.t - MEM[r].at > 5400) delete MEM[r];
+  if (MEM[r] && G.t - MEM[r].at > 18000) delete MEM[r];
   for (let i = 0; i < 80; i++) {
     let ch = G.P[gi(i)] || MAP[gi(i)];
     const m = MEM[r];
@@ -383,7 +383,10 @@ function update() {
     if (P.sw > 2 && P.sw < 13) {
       const bx = P.x + [0, 0, -13, 13][P.d], by = P.y + [14, -10, 2, 2][P.d];
       const i = tileAt(bx + 8, by + 8);
-      if (cur[i] == '"') { cur[i] = '.'; sfx.cut(); puff(bx + 8, by + 8, '6', 8); rnd() < .25 && E.push({ t: 'h', x: bx, y: by, w: 16, n: 0 }); }
+      if (cur[i] == '"') {
+        cur[i] = '.'; sfx.cut(); puff(bx + 8, by + 8, '6', 8);
+        if (i < 10 || i > 69 || !(i % 10) || i % 10 > 8) { G.P[gi(i)] = '.'; sfx.open(); save(); } rnd() < .25 && E.push({ t: 'h', x: bx, y: by, w: 16, n: 0 });
+      }
       for (const e of E) if (e.hp && e.sid != P.sid && hitE(e, bx, by, 16, 16)) {
         e.sid = P.sid;
         if (e.b == 2 && !cur.includes('I')) { sfx.ting(); hint('f'); continue; }
