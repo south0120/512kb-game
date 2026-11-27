@@ -134,12 +134,15 @@ let G, cur = [], rid = 0, th = 0, dark = 0, E = [], sw = [], shots = [], parts =
 const P = { x: 0, y: 0, d: 0, sw: 0, lt: 0, inv: 0, safe: 0, kb: 0, kx: 0, ky: 0, push: 0, wf: 0, get: 0, sid: 0 };
 const old = cnv(W, 128), dk = cnv(W, 128), DK = dk.getContext('2d');
 const gi = i => ((rid >> 2) * 8 + (i / 10 | 0)) * 40 + (rid & 3) * 10 + i % 10;
-const FLR = '.,_ =';
-const under = i => FLR.includes(cur[i - 1]) && i % 10 ? cur[i - 1] : th ? ' ' : '.';
-const SOLID = 'TM~#^HBOScCDdiIYy"*GVWKF';
-const KEY = 'kb32-toudaimori';
+const FLR = '.,_ =j';
+// もの・てきの したの じめん (ひだりどなりに あわせる)
+const under = i => '.,_ ='.includes(cur[i - 1]) && i % 10 ? cur[i - 1] : th ? ' ' : '.';
+// いまは いない ひと・ものの あとを うめる じめん (みずの うえも ある)
+const fill = i => '.,_ =j~'.includes(cur[i - 1]) && i % 10 ? cur[i - 1] : th ? ' ' : '.';
+const SOLID = 'TM~#^HwBOScCDdiIYy"*utkfploGNVWFRJKQEP';
+const KEY = 'kb512-toudaimori';
 const save = () => { try { localStorage[KEY] = JSON.stringify(G); } catch (e) { } };
-const load = () => { try { const g = JSON.parse(localStorage[KEY]); return g.c && g; } catch (e) { } };
+const load = () => { try { const g = JSON.parse(localStorage[KEY]); g.f = g.f || {}; return g.c && g; } catch (e) { } };
 const checkpoint = () => { G.c = [rid, P.x, P.y]; save(); };
 
 function spawn(t, x, y) {
@@ -149,39 +152,21 @@ function spawn(t, x, y) {
   return e;
 }
 function enter(r) {
-  rid = r; th = r < 12 ? 0 : r < 20 ? 1 : r < 28 ? 2 : 3;
+  rid = r; th = HOUSE.includes(r) ? 4 : r < 12 ? 0 : r < 20 ? 1 : r < 28 ? 2 : 3;
   dark = DARK.includes(r);
   E = []; sw = []; shots = []; parts = []; slide = seal = auto = 0; told = {};
   const solved = G.S[r];
   for (let i = 0; i < 80; i++) {
     let ch = G.P[gi(i)] || MAP[gi(i)];
+    if (SHOW[r + ch] && !SHOW[r + ch](stage())) ch = 1;      // いまは いない
     if (solved) ch = ch == 'd' ? ' ' : ch == 'i' ? 'I' : ch == '?' ? 'c' : ch;
     if (ch == 'x') sw.push(i);
     if ('aAbegZ'.includes(ch)) { ch == 'Z' && solved || spawn(ch, i % 10 * 16, (i / 10 | 0) * 16); ch = 0; }
     cur[i] = ch;
   }
-  for (let i = 0; i < 80; i++) cur[i] = cur[i] || under(i);
+  for (let i = 0; i < 80; i++) cur[i] = cur[i] === 1 ? fill(i) : cur[i] || under(i);
   G.V[r] = 1;
-  music(r == 31 ? 3 : E.some(e => e.t == 'Z') ? 2 : th ? 1 : 0);
-}
-
-// ---------- へやを えがく ----------
-function drawTile(g, ch, i, x, y) {
-  const f = fr >> 4 & 1;
-  if (ch == '#') return g.drawImage(wallT[th], x, y);
-  if (ch == ' ') return g.drawImage(floorT[th], x, y);
-  if (ch == '~') return g.drawImage(tl[f ? 'w2' : '~'], x, y);
-  if (ch == 'Y') return g.drawImage(tl[G.won ? 'Y' : 'y'], x, y);
-  if ('.,_^H=MT*dD'.includes(ch)) return g.drawImage(tl[ch], x, y);
-  const u = under(i);
-  g.drawImage(u == ' ' ? floorT[th] : tl[u], x, y);
-  if (ch == '?') return;
-  if (ch == 'I') { g.drawImage(tl.i, x, y); return g.drawImage(FLAME[f], x, y); }
-  if (isW(ch)) return g.drawImage(ch < '6' ? tl.door : tl.s, x, y);
-  g.drawImage(NPC[ch] || tl[ch], x, y);
-}
-function drawRoom(g) {
-  for (let i = 0; i < 80; i++) drawTile(g, slide && slide.to == i ? sw.includes(i) ? 'x' : under(i) : cur[i], i, i % 10 * 16, (i / 10 | 0) * 16);
+  music(th == 4 ? 3 : E.some(e => e.t == 'Z') ? 2 : th ? 1 : 0);
 }
 
 // ---------- あたりはんてい ----------
@@ -215,10 +200,14 @@ function wrap(s, n = 25) {
 }
 async function say(s) {
   busy++;
-  for (const pg of s.split('|')) {
+  let who = '';
+  for (let pg of s.split('|')) {
+    // 「なまえ「せりふ」」は なふだつきで だす。「 から はじまれば まえの ひとの つづき
+    const m = pg.match(/^([^「]{0,8})「(.*?)」?$/);
+    if (m) { who = m[1] || who; pg = m[2]; } else who = '';
     const ls = wrap(pg);
     for (let i = 0; i < ls.length; i += 3) {
-      dlg = { l: ls.slice(i, i + 3), n: 0 };
+      dlg = { l: ls.slice(i, i + 3), n: 0, w: who };
       const tot = dlg.l.join('').length;
       let skip = 0;
       keyRes = () => skip = 1;
@@ -280,7 +269,7 @@ function hurt(n, fx, fy) {
 }
 async function bossDown(e) {
   busy++;
-  music(-1); shots = []; E = E.filter(o => o == e);
+  music(-1); shots = []; E = E.filter(o => o == e); P.inv = P.kb = P.sw = 0;
   for (let i = 0; i < 6; i++) { puff(e.x + ri(32), e.y + ri(32), 'r', 8); sfx.die(); e.inv = 9; await wait(12); }
   E = []; G.S[rid] = 1;
   seal.forEach(([i, c]) => cur[i] = c); seal = 0;
@@ -304,6 +293,11 @@ async function ending() {
   await wait(60);
   await say(OUTRO);
   await fadeTo(1);
+  enter(9); P.x = 72; P.y = 60; P.d = 0;
+  await fadeTo(0);
+  await wait(40);
+  await say(HOME);
+  await fadeTo(1);
   scene = () => {
     R(0, 0, W, H, '0');
     spr(SHARD, 72, 24);
@@ -319,9 +313,17 @@ async function ending() {
 }
 
 // ---------- 主人公 ----------
+async function talk(k) {
+  busy++;
+  let t = TX[k];
+  if (Array.isArray(t)) { let s = stage(); while (s && !t[s]) s--; t = t[s]; }
+  if (t && t.call) t = await t(G);
+  if (t) await say(t);
+  busy--;
+}
 function act() {
   const i = front(), ch = cur[i];
-  if (NPC[ch] || ch == 'S') { const t = TX[rid + ch]; return say(t.call ? t(G) : t); }
+  if (NPC[ch] || ch == 'S') return talk(rid + ch);
   if (ch == 'c') return openChest(i);
   if (HINT[ch] && !('*i'.includes(ch) && G.it[1]) && !(ch == 'O' && G.it[2])) return hint(ch);
   if (G.it[0]) { P.sw = 14; P.sid++; sfx.swing(); }
@@ -413,6 +415,7 @@ function update() {
     seal = [];
     cur.forEach((c, i) => { const tx = i % 10, ty = i / 10 | 0; if (isW(c) || (!tx || !ty || tx > 8 || ty > 6) && !SOLID.includes(c)) { seal.push([i, c]); cur[i] = 'd'; } });
     sfx.boss(); sfx.push();
+    say(BOSSIN[BOSSR[rid]]);
   }
   enemies();
   // しかけが とけたか
@@ -488,6 +491,7 @@ function drawGame() {
   if (slide) spr(tl[slide.ch], slide.x + (slide.to % 10 * 16 - slide.x) * slide.t / 16, slide.y + ((slide.to / 10 | 0) * 16 - slide.y) * slide.t / 16);
   for (const e of E) {
     if (e.inv & 2) continue;
+    e.t == 'h' || shade(X, e.x + e.w / 2 - 5, e.y + e.w - 2, 10, 2, .25);
     if (e.t == 'h') { e.n > 380 && fr & 4 || spr(IC.h, e.x + 4, e.y + 4 - (e.n < 8 ? 8 - e.n : 0)); continue; }
     if (e.t == 'Z') { X.globalAlpha = e.b == 2 && !cur.includes('I') ? .45 : 1; spr(BOSS[e.b], e.x + (e.s == 3 ? (fr & 2) - 1 : 0), e.y + (e.b ? Math.sin(e.n / 12) * 2 : e.n % (e.hp > 4 ? 84 : 60) < 26 ? -5 : 0)); X.globalAlpha = 1; continue; }
     const im = EN[e.t], sl = e.t == 'a' || e.t == 'A';
@@ -496,6 +500,7 @@ function drawGame() {
   // 主人公
   if (!(P.inv & 4)) {
     const w = P.wf >> 3 & 1;
+    shade(X, P.x + 3, P.y + 14, 10, 2, .25);
     if (P.get) { spr(PF, P.x, P.y); spr(P.get, P.x + 8 - P.get.width / 2, P.y - P.get.height + 2); }
     else {
       if (P.sw && P.d == 1) spr(SW[1], P.x + 2, P.y - 11);
@@ -526,7 +531,7 @@ function drawGame() {
   if (mapOn) drawMap();
 }
 function drawMap() {
-  const here = th == 0 ? rid : th == 1 ? 1 : th == 2 ? 11 : rid == 31 ? 9 : 3;
+  const here = th == 0 ? rid : th == 1 ? 1 : th == 2 ? 11 : th == 3 ? 3 : rid == 31 ? 9 : 5;
   const goal = [9, 1, 11, 3, -1][!G.it[0] ? 0 : G.won ? 4 : G.s + 1];
   box(8, 20, 144, 116);
   T('しまの ちず', 120, 37, 'e', 1);
@@ -547,6 +552,7 @@ function draw() {
   if (dlg) {
     const y = !scene && G && P.y > 56 ? 18 : 98;
     box(4, y, 152, 42);
+    if (dlg.w) { const py = y < 50 ? y + 39 : y - 9; box(8, py, dlg.w.length * 5.34 + 10 | 0, 13); T(dlg.w, 20, py * 1.5 + 6, 'e'); }
     let n = dlg.n;
     dlg.l.forEach((l, i) => { T(l.slice(0, Math.max(0, n)), 18, y * 1.5 + 10 + i * 17); n -= l.length; });
     dlg.n > 98 && fr & 16 && R(142, y + 34, 5, 3, 'e');
@@ -560,7 +566,7 @@ async function title() {
   busy++;
   const sv = load();
   let sel = 0;
-  G = { hp: 6, mh: 6, k: 0, s: 0, it: [0, 0, 0], P: {}, S: {}, V: {}, t: 0, dth: 0, won: 0 };
+  G = { hp: 6, mh: 6, k: 0, s: 0, it: [0, 0, 0], P: {}, S: {}, V: {}, f: {}, t: 0, dth: 0, won: 0 };
   enter(3); music(3);
   scene = () => {
     X.save(); X.translate(0, 16); drawRoom(X); X.restore();
