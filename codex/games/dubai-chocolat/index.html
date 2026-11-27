@@ -1,0 +1,458 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#193b34">
+<title>パキッ！ドバイショコラ</title>
+<style>
+:root{color-scheme:light;--ink:#24362c;--cocoa:#603822;--paper:#fff9e5;--teal:#214c3e;--lime:#c9eb91;--gold:#a76931;--line:#c9ba93}
+*{box-sizing:border-box}
+body{margin:0;min-height:100vh;font-family:"Hiragino Kaku Gothic ProN","Yu Gothic",Meiryo,system-ui,sans-serif;color:var(--ink);background-color:#eee6ce;background-image:repeating-linear-gradient(125deg,transparent 0 7px,#9782640b 7px 8px)}
+button,select{font:inherit;color:inherit;cursor:pointer;touch-action:manipulation}
+button:focus-visible,select:focus-visible,canvas:focus-visible,summary:focus-visible{outline:3px solid #de622f;outline-offset:3px}
+button:disabled{cursor:default}
+.shell{max-width:1120px;margin:auto;padding:0 30px 18px}
+header{background:#193b34;color:var(--paper);border-bottom:5px solid #ae8b4c}
+.mast{display:flex;align-items:center;gap:15px;max-width:1120px;padding:19px 30px 20px;margin:auto}
+.brand{width:47px;height:47px;flex:none;background:#69402a;border:4px solid #d39958;box-shadow:inset 2px 2px #b57448,inset -3px -3px #42281f;display:grid;place-items:center;transform:rotate(-6deg)}
+.nut{display:inline-block;width:13px;height:19px;background:#c9e27e;border:2px solid #506b33;border-radius:70% 24% 65% 32%;transform:rotate(38deg);box-shadow:inset 3px 0 #e9efab,inset -3px 0 #91b154;vertical-align:middle}
+.brand .nut{transform:rotate(32deg) scale(1.3)}
+h1,h2,h3,p{margin:0}
+h1{font-family:serif;font-size:clamp(21px,3.3vw,39px);font-weight:900;letter-spacing:.025em;line-height:1.22}
+h1 span{color:#e3c47e}
+.mast p{color:#e3e6ca;font-size:12px;margin-top:4px;letter-spacing:.04em}
+.head-actions{margin-left:auto;display:flex;gap:7px;flex:none}
+.head-actions button{background:transparent;color:#fff7df;border:1px solid #a9b29b;border-radius:3px;padding:8px 12px;font-size:12px;font-weight:700}
+.stagebar{display:flex;justify-content:space-between;align-items:center;gap:12px;margin:20px 0 14px}
+.stagepick{display:flex;align-items:center;gap:10px}
+.stagepick label,.tiny{font-size:11px;font-weight:800;letter-spacing:.075em}
+.stagepick select{font-weight:800;border:1px solid #a09169;border-radius:4px;background:#fff9e7;padding:6px 26px 6px 8px;max-width:100%}
+.best{font-size:12px;font-weight:700;color:#515b43;text-align:right}
+.game{display:grid;grid-template-columns:minmax(0,1.83fr) minmax(255px,1fr);gap:16px;align-items:start}
+.bench,.receipt{border:1px solid #aa9b73;background:var(--paper);box-shadow:0 3px 0 #a79a794d;border-radius:6px}
+.bench{overflow:hidden}
+.boardcap{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:10px 15px;font-size:11px;font-weight:800;color:#fef7dd;background:var(--teal);letter-spacing:.04em}
+.boardcap span:last-child{color:#e0edcc}
+.tabletop{background:#e8bea0;background-image:repeating-linear-gradient(0deg,transparent 0 15px,#75472f0a 15px 16px),repeating-linear-gradient(92deg,transparent 0 53px,#805a3912 54px 55px);padding:18px 8% 19px}
+.foil{position:relative;isolation:isolate;display:flex;align-items:center;justify-content:center;min-height:152px;padding:10px 16px 12px;background:linear-gradient(118deg,#aa8038 0%,#f5d988 8%,#b48e4a 18%,#ffe6a1 29%,#d7af60 43%,#f4d58c 54%,#ac873e 78%,#e8c568 94%);box-shadow:0 4px 0 #67402266}
+.foil:before,.foil:after{content:"";position:absolute;top:0;bottom:0;width:7px;z-index:-1;background:repeating-linear-gradient(0deg,#84612c 0 2px,#f0d288 2px 5px)}
+.foil:before{left:0}.foil:after{right:0}
+canvas{display:block;width:100%;height:auto;max-width:min(100%,calc(var(--board-ratio,1.5) * 325px));image-rendering:pixelated;cursor:crosshair;touch-action:manipulation}
+.legend{display:flex;justify-content:center;gap:16px;padding:6px 8px;font-size:11px;font-weight:700;background:#f6eac6;border-block:1px solid #c0a87a}
+.legend .nut{width:9px;height:13px;margin-right:5px}.thread{display:inline-block;color:#8c551d;font-size:16px;font-weight:900;line-height:9px;letter-spacing:-5px;margin-right:8px}
+.controls{padding:13px 15px 16px}
+.piecehead,.cutrow,.scoreline,.receipt-title,.toolrow,.btnrow{display:flex;align-items:center;justify-content:space-between;gap:8px}
+#pieceName{font-weight:800;font-size:15px}
+.smallbtn,.seg button,.mini,.secondary,.dialogfoot button{border:1px solid #948a6b;background:#fffaf0;border-radius:4px;padding:7px 12px;font-weight:700;font-size:13px;min-height:36px}
+.smallbtn:hover:enabled,.seg button:hover:enabled,.mini:hover:enabled,.secondary:hover:enabled,.dialogfoot button:hover:enabled{background:#efead5}
+.smallbtn:disabled,.mini:disabled,.secondary:disabled,.seg button:disabled{opacity:.47}
+.cutrow{justify-content:flex-start;flex-wrap:wrap;margin:11px 0 8px}
+.seg{display:inline-flex;gap:0}
+.seg button{border-radius:0;min-height:36px}.seg button:first-child{border-radius:4px 0 0 4px}.seg button:last-child{border-radius:0 4px 4px 0;border-left:none}
+.seg button[aria-pressed=true]{background:var(--teal);color:#fff9de}.seg button[aria-pressed=true]:hover{background:#356652}
+.lines{display:flex;align-items:center;gap:4px;flex:1;min-width:145px;justify-content:flex-end}.lines output{min-width:64px;text-align:center;font-size:13px;font-weight:800}
+.mini{font-family:monospace;font-size:17px;min-width:36px;padding:3px 8px}
+.btnrow button{flex:1;min-height:42px;font-size:15px;font-weight:900;border-radius:4px;border:1px solid #51372a;box-shadow:0 2px 0 #50352c;letter-spacing:.05em}
+button:active:enabled{transform:translateY(1px)}
+#snap{background:#67402b;color:#fff3d9}#snap:hover:enabled{background:#7b4a2f}
+#wrap{background:#c7e99b;color:#213e29}#wrap:hover:enabled{background:#b6e581}
+.btnrow button:disabled{background:#e6e0ca!important;color:#6a675b!important;box-shadow:0 2px 0 #a4997c;border-color:#aba084}
+#message{font-size:12px;line-height:1.6;min-height:1.6em;margin:9px 0 0;color:#40553e;font-weight:700}
+.side{display:grid;gap:12px}
+.receipt{padding:15px 17px 17px;position:relative;background:#fff9e7}
+.receipt:after{content:"";position:absolute;bottom:-4px;left:6px;right:6px;height:5px;background:linear-gradient(135deg,#fff9e7 3px,transparent 0) 0 0/8px 5px repeat-x;pointer-events:none}
+.receipt-title{border-bottom:2px solid var(--ink);padding-bottom:9px;letter-spacing:.06em}
+h2{font-family:serif;font-size:21px;line-height:1.2}
+#progress{font-size:13px;font-weight:800;font-variant-numeric:tabular-nums}
+.orders{list-style:none;padding:0;margin:0}
+.order{position:relative;display:flex;align-items:center;justify-content:space-between;gap:8px;padding:10px 1px;border-bottom:1px dashed #b7a677}
+.order .number{font-family:Georgia,serif;color:#766944;font-style:italic;font-size:16px}
+.order .spec{font-size:13px;font-weight:700;white-space:nowrap}
+.order strong{font-family:Georgia,"Times New Roman",serif;font-size:25px;line-height:1;vertical-align:-1px;margin-right:2px}
+.order .sep{font-weight:400;margin:0 5px;color:#9d8c65}
+.order small{font-size:10px;font-weight:800;color:#5d5e4b;white-space:nowrap}
+.order.match{background:#e0edbd}.order.match small{color:#234929}
+.order.done{color:#655f4e;background:#ede9d9}.order.done small{color:#355840}
+.scoreline{padding-top:13px;justify-content:flex-start;flex-wrap:wrap;gap:3px 14px;font-size:12px;font-weight:700}
+.scoreline b{font-family:Georgia,serif;font-size:20px;margin:0 2px}
+.toolrow{justify-content:flex-start}.toolrow button{flex:1}
+details{background:#f6f0dc;border:1px solid #c3b693;border-radius:4px;padding:9px 12px;font-size:12px;line-height:1.65}
+summary{font-weight:800;cursor:pointer}details p{margin-top:5px}
+dialog{width:min(440px,calc(100% - 28px));max-height:90vh;overflow:auto;padding:0;background:var(--paper);border:2px solid #4e573b;border-radius:6px;box-shadow:0 7px 0 #1b3329a6;color:var(--ink)}
+dialog::backdrop{background:#152821b5}
+.dialogbody{padding:24px}
+.dialogbody h2{font-size:27px;color:var(--teal);margin:0 0 12px}
+.dialogbody p,.dialogbody li{font-size:14px;line-height:1.7}.dialogbody ol{margin:8px 0;padding-left:22px}
+.dialogfoot{display:flex;flex-wrap:wrap;justify-content:flex-end;gap:8px;margin-top:18px}
+.dialogfoot .primary{color:#fff8e4;background:var(--teal)}.dialogfoot .primary:hover:enabled{background:#356652}
+#medal{display:inline-block;background:var(--lime);border:1px solid #668148;padding:4px 11px;border-radius:2px;font-size:12px;font-weight:900;margin-bottom:10px}
+#score{font-size:18px;font-weight:900;margin:8px 0}
+@media(min-width:621px) and (max-height:820px){.mast{padding-top:12px;padding-bottom:12px}.stagebar{margin:12px 0 10px}.tabletop{padding-top:11px;padding-bottom:12px}canvas{max-width:min(100%,calc(var(--board-ratio,1.5) * 285px))}}
+@media(max-width:770px){
+.shell{padding:0 14px 16px}.mast{padding:15px 14px;gap:10px}.head-actions button{padding:7px 9px}.brand{width:36px;height:36px}
+.stagebar{margin:13px 0 10px}.game{grid-template-columns:minmax(0,1.52fr) minmax(220px,1fr);gap:10px}.tabletop{padding:17px 5%}.controls{padding:10px}.receipt{padding:12px 10px}.order strong{font-size:22px}.order .sep{margin:0 2px}
+}
+@media(max-width:620px){
+.shell{padding:0 9px 12px}.mast{flex-wrap:wrap;gap:6px 9px;padding:10px}.mast p{font-size:10px}.head-actions{gap:4px}.head-actions button{font-size:11px;padding:6px}.brand{display:none}
+.stagebar{gap:4px;flex-wrap:wrap}.stagepick{gap:4px}.stagepick label{font-size:10px}.stagepick select{font-size:13px;padding:5px 3px}.best{font-size:10px}
+.game{display:flex;flex-direction:column;gap:8px}.side{display:contents}.bench,.receipt,.toolrow,details{width:100%}.receipt{order:-1;padding:7px 9px 9px}
+.receipt-title{border-bottom:0;padding:0 0 4px}.receipt-title h2{font-size:15px}.receipt .orders{display:grid;grid-template-columns:repeat(var(--count,3),minmax(0,1fr));gap:3px}
+.order{display:flex;flex-wrap:wrap;justify-content:center;gap:2px;padding:4px 1px;border:1px dashed #bdad82;border-radius:3px}.order .number{display:none}.order .spec{font-size:10px}.order strong{font-size:19px}.order small{font-size:9px}.order .sep{margin:0 2px}.scoreline{padding-top:3px;font-size:10px}.scoreline b{font-size:14px}
+.tabletop{padding:10px 8% 12px}.foil{padding:6px 12px 8px}.boardcap{padding:6px 9px}.controls{padding:8px 9px}.cutrow{margin:7px 0}.legend{padding:3px 6px}.btnrow button{min-height:38px}.toolrow button{min-height:37px}
+}
+@media(max-width:370px){.head-actions{margin-left:0}.mast{justify-content:space-between}.mast p{display:none}.order .spec{font-size:9px}.order strong{font-size:16px}.seg button{padding:6px}.lines{min-width:125px}.tiny{font-size:10px}}
+</style>
+</head>
+<body>
+<header><div class="mast">
+  <div class="brand" aria-hidden="true"><i class="nut"></i></div>
+  <div><h1><span>パキッ！</span>ドバイショコラ</h1><p>ピスタチオを数えて、注文どおりに折り分けよう。</p></div>
+  <div class="head-actions"><button id="sound" type="button" aria-pressed="false">音 OFF</button><button id="help" type="button">遊び方</button></div>
+</div></header>
+<main class="shell">
+  <div class="stagebar"><div class="stagepick"><label for="stages">本日の板チョコ</label><select id="stages"></select></div><div class="best" id="best"></div></div>
+  <div class="game">
+    <section class="bench" aria-label="チョコの作業台">
+      <div class="boardcap"><span>ショコラの作業台</span><span id="dimensions"></span></div>
+      <div class="tabletop"><div class="foil"><canvas id="board" tabindex="0" aria-label="チョコの盤面。操作方法は遊び方を参照"></canvas></div></div>
+      <div class="legend"><span><i class="nut"></i>ピスタチオ</span><span><i class="thread" aria-hidden="true">〰〰</i>カダイフの筋</span></div>
+      <div class="controls">
+        <div class="piecehead"><div id="pieceName" aria-live="polite"></div><button id="piece" class="smallbtn" type="button">次のかけら ›</button></div>
+        <div class="cutrow"><span class="tiny">折り目</span><div class="seg"><button id="vertical" type="button" aria-pressed="true">縦</button><button id="horizontal" type="button" aria-pressed="false">横</button></div>
+          <div class="lines"><button id="prev" type="button" class="mini" aria-label="前の折り目">‹</button><output id="line"></output><button id="next" type="button" class="mini" aria-label="次の折り目">›</button></div>
+        </div>
+        <div class="btnrow"><button id="snap" type="button">パキッと折る</button><button id="wrap" type="button">包んで渡す</button></div>
+        <p id="message" role="status"></p>
+      </div>
+    </section>
+    <aside class="side">
+      <section class="receipt" aria-label="注文と成績"><div class="receipt-title"><h2>本日の注文票</h2><span id="progress"></span></div><ol id="orders" class="orders"></ol>
+        <div class="scoreline"><span>切った筋 <b id="threads"></b>本</span><span>折った回数 <b id="folds"></b>回</span></div>
+      </section>
+      <div class="toolrow"><button id="undo" class="secondary" type="button">↶ 一手戻す</button><button id="reset" class="secondary" type="button">最初から</button></div>
+      <details><summary>操作の早見表</summary><p>板をタップしてかけらを選び、溝をタップして折り目を合わせます。縦・横と矢印ボタンでも選べます。マス数と粒数が注文と合ったら包みます。</p><p>盤面にフォーカスして ← → で縦線、↑ ↓ で横線、Q・E でかけら選択。Enter で折る、Space で包む、Z で一手戻します。</p></details>
+    </aside>
+  </div>
+</main>
+<dialog id="guide" aria-labelledby="guideTitle"><div class="dialogbody">
+  <h2 id="guideTitle">ショコラの折り分け方</h2>
+  <ol><li>注文票にある「マス数」と「ピスタチオの粒数」を確かめます。</li><li>板をタップしてかけらを選び、その中の溝をタップ。白い破線に沿って「パキッと折る」と、かけらが二つに分かれます。</li><li>条件に合うかけらを選んで「包んで渡す」。すべての注文を包むと完売です。余りが出ても大丈夫。</li></ol>
+  <p>金色の波線はカダイフの筋。切った筋が少ないほどおいしく仕上がります。同点なら折った回数の少ない方が好記録です。</p>
+  <div class="dialogfoot"><button id="closeGuide" class="primary" type="button">作業台に戻る</button></div>
+</div></dialog>
+<dialog id="result" aria-labelledby="resultTitle"><div class="dialogbody">
+  <div id="medal"></div><h2 id="resultTitle">本日のショコラ、完売！</h2>
+  <p id="score"></p><p id="resultNote"></p>
+  <div class="dialogfoot"><button id="review" type="button">作業台を見る</button><button id="again" type="button">もう一度</button><button id="advance" class="primary" type="button">次の板へ ›</button></div>
+</div></dialog>
+<script>
+"use strict";
+// A fiber joins its cell to the neighbor on the right ("r") or below ("d").
+const levels = [
+  {name:"はじまりの一枚", rows:["...o..","......","o.....",".oo.o."], fibers:[[3,2,"d"]], orders:[[4,2],[8,2],[12,1]]},
+  {name:"路地裏のお茶会", rows:["o.o..",".o..o","...o.","o...."], fibers:[[0,1,"d"],[3,1,"r"],[1,3,"r"]], orders:[[6,2],[8,3],[6,1]]},
+  {name:"夜市の量り売り", rows:["o..o..",".....o",".oo...","...o.o"], fibers:[[0,2,"r"],[1,1,"d"],[3,0,"r"],[5,2,"d"]], orders:[[4,2],[6,1],[8,2]]},
+  {name:"金糸の贈りもの", rows:[".o....","...o..","o.o.o.","...o..",".o...o"], fibers:[[1,0,"r"],[2,1,"d"],[4,2,"r"],[0,1,"d"],[3,3,"d"]], orders:[[8,1],[10,3],[12,4]]},
+  {name:"星夜のご予約", rows:["...o...","o....o.","..o.o..",".o.o..o","o.o.o.."], fibers:[[1,1,"d"],[3,1,"d"],[2,4,"r"],[5,2,"r"],[0,2,"d"],[4,3,"r"]], orders:[[6,3],[12,4],[8,2],[9,2]]},
+  {name:"ショコラの晩餐", rows:["..o...o",".o..o..","o.oo.o.","..o...o",".o..o.."], fibers:[[0,1,"d"],[1,0,"r"],[2,1,"d"],[4,2,"r"],[5,2,"r"],[3,3,"r"],[0,3,"d"]], orders:[[3,1],[9,4],[10,3],[6,2]]}
+];
+const el=id=>document.getElementById(id);
+const board=el("board"), ctx=board.getContext("2d");
+const cell=32, margin=12, storageKey="dubai-chocolat-best-v1";
+let records={};
+try{records=JSON.parse(localStorage.getItem(storageKey)) || {};}catch{}
+if(typeof records!=="object" || Array.isArray(records))records={};
+let levelIndex=0, pieces=[], filled=[], selected=0, direction="v", cut=1, severed=0, folds=0, history=[], note="";
+let audioEnabled=false, audioContext;
+const level=()=>levels[levelIndex];
+const width=()=>level().rows[0].length;
+const height=()=>level().rows.length;
+const current=()=>pieces[selected];
+const enclosed=(p,x,y)=>x>=p.x && y>=p.y && x<p.x+p.w && y<p.y+p.h;
+const col=x=>String.fromCharCode(65+x);
+function stats(p){
+  let nuts=0;
+  for(let y=p.y;y<p.y+p.h;y++)for(let x=p.x;x<p.x+p.w;x++)if(level().rows[y][x]==="o")nuts++;
+  return [p.w*p.h,nuts];
+}
+function match(p){
+  if(!p)return -1;
+  const [size,nuts]=stats(p);
+  return level().orders.findIndex(([s,n],index)=>!filled[index] && s===size && n===nuts);
+}
+function span(p,d){return !p?0:d==="v"?p.w:p.h}
+function selectPiece(index,keepLine=false){
+  if(pieces.length===0){selected=0;cut=0;return}
+  selected=(index+pieces.length)%pieces.length;
+  const p=current();
+  if(span(p,direction)<2)direction=direction==="v"?"h":"v";
+  const maximum=span(p,direction)-1;
+  cut=Math.min(maximum,Math.max(1,keepLine?cut:Math.floor((maximum+1)/2)));
+}
+function chooseDirection(d){
+  if(span(current(),d)<2)return;
+  if(direction!==d){direction=d;cut=Math.floor(span(current(),d)/2)}
+  note="";render();
+}
+function shiftLine(step){
+  const maximum=span(current(),direction)-1;
+  if(maximum<1)return;
+  cut=Math.min(maximum,Math.max(1,cut+step));note="";render();
+}
+function inFiber(p,[x,y,axis]){
+  return enclosed(p,x,y) && enclosed(p,x+(axis==="r"?1:0),y+(axis==="d"?1:0));
+}
+function crossing(p){
+  if(!p || !cut)return 0;
+  return level().fibers.filter(fiber=>{
+    const [x,y,axis]=fiber;
+    return inFiber(p,fiber) && (direction==="v"?axis==="r" && x+1===p.x+cut:axis==="d" && y+1===p.y+cut);
+  }).length;
+}
+function snapshot(){return {pieces:pieces.map(p=>({...p})),filled:[...filled],selected,direction,cut,severed,folds}}
+function restore(s){
+  pieces=s.pieces;filled=s.filled;selected=s.selected;direction=s.direction;cut=s.cut;severed=s.severed;folds=s.folds;
+}
+function fresh(){
+  pieces=[{x:0,y:0,w:width(),h:height()}];filled=level().orders.map(()=>false);
+  severed=0;folds=0;direction="v";selectPiece(0);
+  note="注文票を見て、白い破線を折りたい溝に合わせよう。";
+}
+function start(index){
+  levelIndex=index;el("stages").value=String(index);history=[];fresh();
+  board.width=width()*cell+margin*2;board.height=height()*cell+margin*2;
+  board.style.setProperty("--board-ratio",board.width/board.height);
+  render();
+}
+function changePiece(step){
+  selectPiece(selected+step);note="";render();
+}
+function sound(kind){
+  if(!audioEnabled)return;
+  try{
+    audioContext ||= new (window.AudioContext || window.webkitAudioContext)();
+    if(audioContext.state==="suspended")audioContext.resume().catch(()=>{});
+    const now=audioContext.currentTime;
+    const tones=kind==="win"?[392,494,587,784]:kind==="wrap"?[494,659]:[210,96];
+    tones.forEach((frequency,i)=>{
+      const wave=audioContext.createOscillator(), volume=audioContext.createGain();
+      const t=now+i*(kind==="snap"?0.015:0.075);
+      wave.type=kind==="snap"?"sawtooth":"triangle";wave.frequency.setValueAtTime(frequency,t);
+      volume.gain.setValueAtTime(0.0001,t);volume.gain.exponentialRampToValueAtTime(0.07,t+0.004);
+      volume.gain.exponentialRampToValueAtTime(0.0001,t+(kind==="snap"?0.055:0.12));
+      wave.connect(volume).connect(audioContext.destination);wave.start(t);wave.stop(t+0.14);
+    });
+  }catch{}
+}
+function snap(){
+  const p=current();
+  if(!p || cut<1 || cut>=span(p,direction) || filled.every(Boolean))return;
+  history.push(snapshot());
+  const lost=crossing(p), a={...p}, b={...p};
+  if(direction==="v"){a.w=cut;b.x+=cut;b.w-=cut}
+  else{a.h=cut;b.y+=cut;b.h-=cut}
+  pieces.splice(selected,1,a,b);severed+=lost;folds++;
+  const target=match(a)===-1 && match(b)!==-1?selected+1:selected;
+  selectPiece(target);
+  note=lost?"パキッ！　カダイフの筋が"+lost+"本切れた。":"パキッ！　カダイフの筋を残して折れた。";
+  sound("snap");render();
+}
+function pack(){
+  const index=match(current());
+  if(index<0)return;
+  history.push(snapshot());filled[index]=true;pieces.splice(selected,1);
+  selectPiece(Math.min(selected,pieces.length-1));
+  note="注文 "+String(index+1).padStart(2,"0")+" を包装しました。";
+  render();
+  if(filled.every(Boolean)){sound("win");finish()}else sound("wrap");
+}
+function undo(){
+  if(!history.length)return;
+  restore(history.pop());note="一手戻しました。";render();
+}
+function reset(){
+  if(folds || filled.some(Boolean))history.push(snapshot());
+  fresh();render();
+}
+function bestRecord(){
+  const value=records[levelIndex];
+  return Array.isArray(value)&&value.length===2&&value.every(n=>Number.isInteger(n)&&n>=0)?value:null;
+}
+function bestText(){
+  const record=bestRecord();
+  return record?"ベスト　筋 "+record[0]+"本 ／ "+record[1]+"折":"ベスト　未クリア";
+}
+function finish(){
+  const old=bestRecord();
+  const improved=!old || severed<old[0] || (severed===old[0] && folds<old[1]);
+  if(improved){
+    records[levelIndex]=[severed,folds];
+    try{localStorage.setItem(storageKey,JSON.stringify(records))}catch{}
+  }
+  el("best").textContent=bestText();
+  el("resultTitle").textContent=levels.every((_,i)=>Array.isArray(records[i]))?"全6枚のショコラ、完売！":"本日のショコラ、完売！";
+  el("medal").textContent=severed===0?"金糸まるごと仕上げ":"ショコラティエの包み";
+  el("score").textContent="切った筋 "+severed+"本　／　"+folds+"折";
+  el("resultNote").textContent=(improved?(old?"自己ベスト更新！　":"初めての完売！　"):"")+bestText()+"。";
+  el("advance").hidden=levelIndex===levels.length-1;
+  el("result").showModal();
+}
+const nutSprite=[
+  "         xxx  ","      xxxyyx  ","     xyylllx  ","    xyyllglxx ",
+  "   xyyllggggx ","   xyllgggghx ","  xyllgggghx  ","  xllgggghhx  ",
+  "  xlggggghx   ","  xggggghx    ","   xgghhx     ","    xxxx      "
+];
+const nutColors={x:"#4b4d26",y:"#e9d3a0",l:"#d8ea8a",g:"#a0bc50",h:"#749142"};
+function rect(x,y,w,h,color){ctx.fillStyle=color;ctx.fillRect(x,y,w,h)}
+function drawNut(x,y){
+  rect(x+3,y+9,8,4,"#4c2a20");
+  nutSprite.forEach((row,j)=>{for(let i=0;i<row.length;i++)if(nutColors[row[i]])rect(x+i,y+j,1,1,nutColors[row[i]])});
+}
+function drawCell(x,y){
+  const px=margin+x*cell,py=margin+y*cell, t=(x*7+y*5+x*y)%4;
+  const top=["#a46543","#965839","#a46945","#995d3d"][t];
+  const face=["#895035","#82472f","#925439","#884c32"][t];
+  rect(px,py,cell,cell,"#512d23");
+  rect(px+1,py+1,cell-3,cell-4,"#683a2a");
+  rect(px+2,py+1,cell-5,3,top);rect(px+1,py+3,3,cell-8,top);
+  rect(px+4,py+4,cell-9,cell-10,face);rect(px+5,py+3,cell-11,2,"#b3724c");
+  rect(px+3,py+5,2,cell-12,"#ac6945");rect(px+6,py+5,8,1,"#c3855a");
+  rect(px+cell-5,py+5,2,cell-11,"#78412d");rect(px+5,py+cell-6,cell-11,2,"#683729");
+  rect(px+cell-4,py+cell-5,2,2,"#4a2b22");
+  const bx=px+10+(t%2)*3,by=py+15;
+  if(level().rows[y][x]==="o")drawNut(px+8,py+8);
+  else{
+    for(let i=0;i<3;i++){rect(bx+i*2,by-i*2,3,1,"#9e6243");rect(bx+i*2,by-i*2+1,3,1,"#74412e")}
+  }
+  rect(px+7+(t*3)%13,py+22,1,1,"#b87c56");
+}
+function drawFiber([x,y,axis]){
+  const sx=margin+x*cell+(axis==="r"?cell:cell/2+5);
+  const sy=margin+y*cell+(axis==="d"?cell:cell/2+5);
+  for(let i=-10;i<=10;i++){
+    const bend=Math.round(1.65*Math.sin((i+2)*.78));
+    const px=sx+(axis==="r"?i:bend),py=sy+(axis==="d"?i:bend);
+    rect(px-1,py-1,3,3,"#684624");rect(px,py,2,2,"#f6c875");
+  }
+}
+function outline(p,selectedPiece){
+  const x=margin+p.x*cell,y=margin+p.y*cell,w=p.w*cell,h=p.h*cell;
+  ctx.lineWidth=2;ctx.strokeStyle="#3d2c21";ctx.strokeRect(x+1,y+1,w-2,h-2);
+  if(!selectedPiece)return;
+  ctx.strokeStyle="#d9f599";ctx.lineWidth=1;ctx.strokeRect(x+1.5,y+1.5,w-3,h-3);
+  for(const [dx,dy,ex,ey] of [[0,0,1,1],[w,0,-1,1],[0,h,1,-1],[w,h,-1,-1]]){
+    const edgeX=x+dx+(ex>0?0:-2),edgeY=y+dy+(ey>0?0:-2);
+    rect(ex>0?edgeX:edgeX-4,edgeY,6,2,"#e5ffab");rect(edgeX,ey>0?edgeY:edgeY-4,2,6,"#e5ffab");
+  }
+}
+function drawGuide(p){
+  if(!p || cut<1 || filled.every(Boolean))return;
+  const v=direction==="v", x=margin+(p.x+(v?cut:0))*cell, y=margin+(p.y+(v?0:cut))*cell;
+  const length=(v?p.h:p.w)*cell;
+  for(let i=1;i<length-1;i+=7){
+    rect(x+(v?-1:i),y+(v?i:-1),v?3:4,v?4:3,"#433f30");
+    rect(x+(v?0:i),y+(v?i:0),v?1:4,v?4:1,"#fff7dc");
+  }
+  for(let j=0;j<2;j++)for(let k=0;k<3;k++){
+    const offset=j===0?-1-k:length+k;
+    rect(x+(v?-k:offset),y+(v?offset:-k),v?k*2+1:1,v?1:k*2+1,"#fff9df");
+  }
+}
+function drawBoard(){
+  ctx.clearRect(0,0,board.width,board.height);
+  ctx.font="bold 7px monospace";ctx.textAlign="center";ctx.textBaseline="middle";ctx.fillStyle="#4c371e";
+  for(let x=0;x<width();x++)ctx.fillText(col(x),margin+(x+.5)*cell,5);
+  for(let y=0;y<height();y++)ctx.fillText(String(y+1),5,margin+(y+.5)*cell);
+  for(let y=0;y<height();y++)for(let x=0;x<width();x++){
+    if(pieces.some(p=>enclosed(p,x,y)))drawCell(x,y);
+    else{
+      const px=margin+x*cell,py=margin+y*cell;
+      rect(px+13,py+15,5,1,"#a88847");rect(px+15,py+13,1,5,"#a88847");
+    }
+  }
+  for(const fiber of level().fibers)if(pieces.some(p=>inFiber(p,fiber)))drawFiber(fiber);
+  for(const p of pieces)outline(p,p===current()&&!filled.every(Boolean));
+  drawGuide(current());
+}
+function render(){
+  const p=current(), done=filled.every(Boolean), available=match(p);
+  drawBoard();
+  const orders=el("orders");orders.replaceChildren();orders.style.setProperty("--count",filled.length);
+  level().orders.forEach(([size,nuts],i)=>{
+    const li=document.createElement("li");
+    li.className="order"+(filled[i]?" done":available===i?" match":"");
+    const number=document.createElement("span");number.className="number";number.textContent="No."+String(i+1).padStart(2,"0");
+    const spec=document.createElement("span");spec.className="spec";spec.innerHTML="<strong>"+size+"</strong>マス<span class='sep'>／</span><strong>"+nuts+"</strong>粒";
+    const status=document.createElement("small");status.textContent=filled[i]?"✓ 包装済":available===i?"包装OK":"受付中";
+    li.append(number,spec,status);orders.append(li);
+  });
+  el("progress").textContent=filled.filter(Boolean).length+" / "+filled.length+" 包";
+  el("dimensions").textContent=width()+" × "+height()+" マス";
+  el("best").textContent=bestText();el("threads").textContent=severed;el("folds").textContent=folds;
+  if(p && !done){
+    const [size,nuts]=stats(p);
+    el("pieceName").textContent=col(p.x)+(p.y+1)+" のかけら　"+size+"マス・"+nuts+"粒";
+  }else{
+    el("pieceName").textContent=done?"すべての注文をお渡ししました":"かけらなし";
+  }
+  el("piece").disabled=pieces.length<=1 || done;
+  el("vertical").disabled=done || span(p,"v")<2;el("horizontal").disabled=done || span(p,"h")<2;
+  el("vertical").setAttribute("aria-pressed",direction==="v");el("horizontal").setAttribute("aria-pressed",direction==="h");
+  const hasLine=Boolean(p && !done && span(p,direction)>1);
+  const label=!hasLine?"―":direction==="v"?col(p.x+cut-1)+" ｜ "+col(p.x+cut):(p.y+cut)+" ─ "+(p.y+cut+1);
+  el("line").textContent=label;el("prev").disabled=!hasLine || cut<=1;el("next").disabled=!hasLine || cut>=span(p,direction)-1;
+  el("snap").disabled=!hasLine;el("wrap").disabled=available<0 || done;
+  el("undo").disabled=history.length===0;el("reset").disabled=!history.length && folds===0;
+  const advice=available!==-1?"注文 "+String(available+1).padStart(2,"0")+" にぴったり。包んで渡せます。":
+    hasLine?"この折り目で切れる筋は "+crossing(p)+"本。":"別のかけらを選ぶか、一手戻せます。";
+  el("message").textContent=done?"すべての注文を包装しました。":(note?note+" ":"")+advice;
+}
+board.addEventListener("click",event=>{
+  if(filled.every(Boolean))return;
+  const bounds=board.getBoundingClientRect();
+  const x=((event.clientX-bounds.left)*board.width/bounds.width-margin)/cell;
+  const y=((event.clientY-bounds.top)*board.height/bounds.height-margin)/cell;
+  const index=pieces.findIndex(p=>enclosed(p,x,y));
+  if(index===-1)return;
+  if(selected!==index)selectPiece(index);
+  const p=current(), vx=Math.round(x-p.x),hy=Math.round(y-p.y);
+  const dx=vx>0 && vx<p.w?Math.abs(x-p.x-vx):Infinity;
+  const dy=hy>0 && hy<p.h?Math.abs(y-p.y-hy):Infinity;
+  if(Math.min(dx,dy)<.33){
+    direction=dx<=dy?"v":"h";cut=direction==="v"?vx:hy;
+  }
+  note="";render();board.focus({preventScroll:true});
+});
+board.addEventListener("keydown",event=>{
+  const key=event.key.toLowerCase();
+  if(event.ctrlKey || event.metaKey || event.altKey)return;
+  if(!["arrowleft","arrowright","arrowup","arrowdown","q","e","enter"," ","z"].includes(key))return;
+  event.preventDefault();
+  if(key==="z"){undo();return}
+  if(filled.every(Boolean))return;
+  if(key.startsWith("arrow")){
+    const d=key==="arrowleft" || key==="arrowright"?"v":"h";
+    if(direction!==d)chooseDirection(d);
+    else shiftLine(key==="arrowleft" || key==="arrowup"?-1:1);
+  }else if(key==="q" || key==="e")changePiece(key==="q"?-1:1);
+  else if(key==="enter")snap();
+  else if(key===" ")pack();
+});
+levels.forEach((l,i)=>el("stages").add(new Option(String(i+1).padStart(2,"0")+"　"+l.name,String(i))));
+el("stages").onchange=()=>start(Number(el("stages").value));
+el("piece").onclick=()=>changePiece(1);el("vertical").onclick=()=>chooseDirection("v");el("horizontal").onclick=()=>chooseDirection("h");
+el("prev").onclick=()=>shiftLine(-1);el("next").onclick=()=>shiftLine(1);el("snap").onclick=snap;el("wrap").onclick=pack;
+el("undo").onclick=undo;el("reset").onclick=reset;
+el("sound").onclick=()=>{
+  audioEnabled=!audioEnabled;el("sound").setAttribute("aria-pressed",audioEnabled);el("sound").textContent=audioEnabled?"音 ON":"音 OFF";
+  if(audioEnabled)sound("wrap");
+};
+el("help").onclick=()=>el("guide").showModal();
+el("closeGuide").onclick=()=>el("guide").close();el("review").onclick=()=>el("result").close();
+el("again").onclick=()=>{el("result").close();start(levelIndex)};
+el("advance").onclick=()=>{el("result").close();start(levelIndex+1)};
+start(0);
+</script>
+</body>
+</html>

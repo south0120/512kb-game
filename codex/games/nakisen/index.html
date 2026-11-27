@@ -1,0 +1,473 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="icon" href="data:,">
+<meta name="theme-color" content="#eef0db">
+<title>鳴き線のフィールドノート｜第一駅・雨待駅</title>
+<style>
+:root{--ink:#243c37;--muted:#536854;--sheet:#faf7e9;--line:#bcc2a8;--green:#315547;--orange:#a84328;--sun:#f5ce73;--display:"Yu Mincho","Hiragino Mincho ProN",Georgia,serif}
+*{box-sizing:border-box}body{margin:0;color:var(--ink);background:#e6e6d2;background-image:radial-gradient(#a1ab871f 1px,transparent 1px);background-size:5px 5px;font-family:"Hiragino Kaku Gothic ProN","Yu Gothic",system-ui,sans-serif;font-size:15px;line-height:1.62}
+button{font:inherit;color:inherit;cursor:pointer;touch-action:manipulation}button:disabled{cursor:default}button:focus-visible,a:focus-visible{outline:3px solid #ac422d;outline-offset:3px}a{color:var(--green)}button, a{-webkit-tap-highlight-color:transparent}button:active:not(:disabled){transform:translateY(1px)}
+main{width:min(980px,calc(100% - 40px));margin:20px auto 28px}.mast{display:flex;align-items:center;justify-content:space-between;gap:14px;padding:7px 2px 16px}.brand{display:flex;align-items:center;gap:11px}.brandicon{background:var(--green);border-radius:50%;height:45px;width:45px;display:grid;place-items:center;color:#ffe4a4}.brandicon svg{width:30px;height:30px;image-rendering:pixelated}.edition{font-size:11px;font-weight:800;letter-spacing:.19em;color:var(--muted)}h1,h2,h3,p{margin:0}h1{font:800 clamp(21px,4.3vw,34px)/1.2 var(--display);letter-spacing:.05em}.sound,.quiet,.replay,.voice,.tune{border:1px solid var(--line);background:var(--sheet);font-size:13px;font-weight:750;border-radius:4px;padding:7px 12px}.sound{white-space:nowrap;min-height:38px;border-color:#98a68c}
+.hero{position:relative;border:2px solid #2a423a;overflow:hidden;background:#b4cfb4;box-shadow:0 4px 0 #34493928}.hero canvas{display:block;width:100%;height:auto;image-rendering:pixelated}.postmark{position:absolute;left:12px;bottom:10px;background:#f9f4da;color:#293e35;padding:2px 9px;border:1px solid #4f6252;box-shadow:2px 2px 0 #2c433855;font-size:12px;font-weight:750;letter-spacing:.1em}
+.spread{margin-top:18px;display:grid;grid-template-columns:minmax(0,1fr) 245px;gap:16px;align-items:start}.page,.log{background:var(--sheet);border:1px solid var(--line);box-shadow:2px 3px 0 #777d6030;border-radius:3px}.page{padding:clamp(14px,2.7vw,26px);position:relative;min-height:300px}.log{padding:16px 15px}.kicker,.count,.location-no{font-size:11px;color:var(--orange);font-weight:850;letter-spacing:.09em}.page h2{font:750 clamp(23px,3.4vw,31px)/1.32 var(--display);letter-spacing:.02em;margin:3px 0 8px}.lead{font-size:14px;margin-bottom:16px}.log h2{font:750 20px/1.4 var(--display)}.loghead,.row,.subhead,.logitem,.toolrow,.voices{display:flex;align-items:center;gap:8px}.loghead,.subhead{justify-content:space-between}.loghead{padding-bottom:8px;border-bottom:1px solid var(--line)}.logitem{padding:10px 0;border-bottom:1px dashed var(--line);min-height:57px}.logitem:last-of-type{border-bottom:0}.badge{width:35px;height:32px;display:grid;place-items:center;flex:none;color:#305543}.badge svg,.bigicon svg{width:100%;height:100%;image-rendering:pixelated}.badge.hidden{opacity:.5;filter:grayscale(1)}.logitem b,.logitem small{display:block}.logitem b{font-size:13px}.logitem small,.fine{font-size:12px;color:var(--muted)}.tune{padding:4px 7px;margin-left:auto;min-height:34px;white-space:nowrap;font-size:12px}.lognote{margin-top:9px;font-size:12px;color:var(--muted)}.places{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}.place,.teamcard{padding:8px 9px 10px;text-align:left;background:#f1eedc;border:1px solid #a7b29a;border-bottom:3px solid #879981;border-radius:3px;display:flex;flex-direction:column;gap:1px;align-items:flex-start}.place:hover,.teamcard:hover,.quiet:hover,.sound:hover,.voice:hover,.replay:hover,.tune:hover{background:#e2e9cf}.bigicon{display:block;width:42px;height:37px}.place b,.teamcard b{font-size:15px}.place small,.teamcard small{font-size:12px;color:var(--muted)}.primary,.gate{font-weight:750;border:1px solid #254336;border-bottom:3px solid #1e3b2d;border-radius:4px;background:var(--green);color:#fff9e0;padding:9px 15px;min-height:41px}.primary:hover,.gate:hover{background:#416d54}.primary:disabled,.gate:disabled{color:#596858;border-color:#a3ae99;background:#dfe3d0}.gate{margin-top:11px;width:100%;display:flex;justify-content:space-between;align-items:center;text-align:left}.gate small{font-size:12px;font-weight:550}.quiet,.replay{min-height:36px}.toolrow,.voices{flex-wrap:wrap}.toolrow{margin-top:13px;gap:8px}.voices{margin:8px 0}.voice[aria-pressed=true],.teamcard[aria-pressed=true]{border-color:var(--green);background:#d4e2c2}.section-label{font-weight:750;font-size:13px}.score{margin:12px 0;padding:12px;background:#e9ead5;border:1px solid var(--line);border-radius:3px}.rhythms{display:grid;grid-template-columns:minmax(44px,auto) repeat(4,minmax(0,1fr));align-items:center;gap:5px;margin-top:6px}.score .label{font-size:12px;font-weight:750;white-space:nowrap;color:var(--muted)}.beat,.source,.target{border:1px solid #b1b99d;border-radius:3px;text-align:center;padding:5px 0;font-weight:750;font-size:14px;line-height:1.45;min-height:33px}.source{background:#e1e2ca;color:#67765e}.source.called{background:#526454;color:#fff7d9}.target{background:#eff0dd;color:#435946}.beat{background:#faf8ea;border-bottom:3px solid #b1b99d;min-height:45px}.beat:not(:disabled):hover{border-color:var(--green)}.beat.filled{background:var(--sun);border-color:#b27c38;color:#4a3c27}.beat small{display:block;font-size:10px;line-height:1.1;font-weight:550}.lit{outline:3px solid #bf6839;outline-offset:-2px}.notice{border-left:3px solid #a34a28;background:#f4ead4;padding:7px 10px;color:#674527;font-size:13px;margin-top:10px}.team{display:flex;gap:8px;flex-wrap:wrap}.teamcard{flex:1;min-width:100px}.ending{padding:12px 16px;border:1px dashed var(--green);margin:12px 0;background:#edf0db}.foot{margin:15px 0;text-align:right;font-size:11px;letter-spacing:.04em;color:var(--muted)}.foot kbd{background:#efefdc;border:1px solid var(--line);padding:0 4px;border-radius:3px}.feedback:empty{display:none}
+@media(max-width:740px){main{width:min(100% - 24px,640px);margin-top:4px}.mast{padding:8px 0 12px}.spread{grid-template-columns:minmax(0,1fr);margin-top:10px;gap:10px}.log{padding:12px 14px}.logitem{display:inline-flex;vertical-align:top;flex-wrap:wrap;width:33.33%;padding:8px 5px 0 0;border:0;gap:4px;align-content:flex-start}.logitem .badge{width:27px;height:26px}.logitem small{font-size:10px}.tune{padding:3px 6px;margin-left:0}.lognote{margin-top:10px}.postmark{left:6px;bottom:5px;font-size:10px}.page{min-height:0}.brandicon{width:36px;height:36px}.edition{font-size:9px}.brand{gap:7px}.sound{font-size:12px;padding:5px 9px}.hero canvas{min-height:108px;object-fit:cover}.foot{display:none}}
+@media(max-width:395px){.places{gap:5px}.place{padding:6px}.place b{font-size:13px}.page{padding:12px}.rhythms{gap:3px}.beat,.source,.target{font-size:12px}.score{padding:8px}.logitem{display:flex;width:100%}.tune{margin-left:auto}.brandicon{display:none}}
+@media(prefers-reduced-motion:reduce){*{scroll-behavior:auto!important}}
+</style>
+</head>
+<body>
+<main>
+<header class="mast"><div class="brand"><div class="brandicon" aria-hidden="true"><svg viewBox="0 0 20 20" fill="currentColor"><path d="M2 13h3v3H2zm3-2h3v4H5zm3-2h3v5H8zm3-2h3v6h-3zm3-3h4v6h-4zm4 2h2v2h-2zM4 16h8v1H4z"/></svg></div><div><div class="edition">沿線生きもの調査手帳</div><h1>鳴き線のフィールドノート</h1></div></div><button type="button" class="sound" id="sound" aria-pressed="false">音：切</button></header>
+<div class="hero"><canvas width="384" height="112" id="scenery" role="img" aria-label="田園を走る廃線と雨待駅"></canvas><span class="postmark" id="postmark">第一駅　雨待駅</span></div>
+<div class="spread"><section class="page" id="page" aria-label="調査と演奏"></section><aside class="log" id="log" aria-label="調査記録"></aside></div>
+<p class="foot">操作　<kbd>Tab</kbd> 選ぶ　<kbd>Enter</kbd> 決定　／　演奏中は <kbd>1</kbd> 〜 <kbd>4</kbd> で拍を置く</p>
+</main>
+<script>
+'use strict';
+function paintStation(canvas, place, found, phase = 0) {
+  const ctx = canvas.getContext("2d");
+  if (!ctx) return;
+  const evening = place === "ending";
+  const companions = Array.isArray(found) ? found : [];
+  const ink = evening ? "#342e46" : "#243e45";
+  const green = evening ? "#454c4c" : "#48684d";
+  const dark = evening ? "#3f4750" : "#355749";
+  const dx = Math.sin(phase * 1.8);
+  ctx.save();
+  ctx.imageSmoothingEnabled = false;
+  const rect = (x, y, w, h, color) => {
+    ctx.fillStyle = color;
+    ctx.fillRect(Math.round(x), Math.round(y), w, h);
+  };
+  const line = (x1, y1, x2, y2, color, size = 1) => {
+    const n = Math.max(Math.abs(x2-x1), Math.abs(y2-y1), 1);
+    for (let j = 0; j <= n; j++)
+      rect(x1+(x2-x1)*j/n,y1+(y2-y1)*j/n,size,size,color);
+  };
+  const polygon = (points, color) => {
+    const ys = points.map(p => p[1]);
+    for (let y = Math.min(...ys); y < Math.max(...ys); y++) {
+      const edges = [];
+      for (let j = 0; j < points.length; j++) {
+        const [x1,y1] = points[j], [x2,y2] = points[(j+1)%points.length];
+        if ((y1 <= y && y < y2) || (y2 <= y && y < y1))
+          edges.push(x1+(x2-x1)*(y-y1)/(y2-y1));
+      }
+      edges.sort((a,b) => a-b);
+      for (let j = 0; j+1 < edges.length; j += 2)
+        rect(Math.ceil(edges[j]),y,Math.max(1,Math.ceil(edges[j+1])-Math.ceil(edges[j])),1,color);
+    }
+  };
+  const disc = (x,y,r,c) => {
+    for (let k=-r; k<=r; k++) {
+      const d=Math.floor(Math.sqrt(r*r-k*k)); rect(x-d,y+k,2*d+1,1,c);
+    }
+  };
+  const noise = n => {
+    const f = Math.sin(n * 127.1 + 311.7) * 43758.5453;
+    return f - Math.floor(f);
+  };
+  const sky = evening ? ["#8b829e","#bc92a5","#e8a399","#f5bf93","#f6d299"] :
+    ["#88bdc3","#a1ccd0","#bad9cc","#d8dfbb","#f4e2b7"];
+  [0,14,27,40,55].forEach((y,i) => rect(0,y,384,112-y,sky[i]));
+  const sunX = evening ? 93 : 278, sunY = evening ? 37 : 21;
+  disc(sunX,sunY,10,evening ? "#ffdda0" : "#fff2c7");
+  for (const [x,y,w] of [[19,16,46],[94,30,36],[178,10,33],[321,23,48]]) {
+    const c=evening ? "#f3b79e" : "#f4edcf";
+    rect(x,y,w,2,c); rect(x+7,y-2,w-17,2,c); rect(x+14,y-4,10,2,c);
+    rect(x+w+4,y,8,1,c);
+  }
+  const hills = (base, amp, seed, col) => {
+    const pts=[[-4,78]];
+    for (let x=-4; x<390; x+=4) {
+      const y=base+amp*Math.sin(x*.04+seed)+amp*.45*Math.sin(x*.091-seed)+noise(x+seed)*1.9;
+      pts.push([x,Math.round(y)]);
+    }
+    pts.push([392,79]); polygon(pts,col);
+  };
+  hills(52,8,1.8,evening ? "#a8888e" : "#9fb4a5");
+  hills(58,6,3.3,evening ? "#8a797f" : "#82a596");
+  hills(63,4,6.5,evening ? "#776f75" : "#749387");
+  rect(0,65,384,47,evening ? "#bcaa75" : "#c5c17e");
+  rect(0,67,384,2,evening ? "#958b68" : "#94a477");
+  const fields = evening ? ["#b8a278","#a19869","#80815f","#c7af7f"] :
+    ["#d2c787","#b9bc71","#94a965","#e0cd8e"];
+  for (let i=0;i<6;i++) {
+    const x=i*78-38;
+    polygon([[x,70],[x+61,70],[x+26,91],[x-93,91]],fields[i%4]);
+    line(x+63,70,x+27,91,green);
+  }
+  for (let i=0;i<70;i++) {
+    let x=Math.floor(noise(i+11)*384),y=70+Math.floor(noise(i+23)*17);
+    rect(x,y,2+Math.floor(noise(i+7)*5),1,fields[i%4]);
+  }
+  const grove = (x,y,s) => {
+    rect(x,y+s,2,s,dark); rect(x-s+2,y,s*2-2,s+2,green);
+    rect(x-s+4,y-2,s*2-8,3,evening ? "#807b61" : "#7e946b");
+  };
+  for (let i=0;i<24;i++) grove(Math.round(noise(i+31)*384),62+Math.floor(noise(i+56)*3),3+Math.floor(noise(i+101)*5));
+  const roof = (x,y,w) => {
+    rect(x+2,y,w-4,8,evening ? "#bb9b80" : "#e4d4a6");
+    polygon([[x-2,y+1],[x+2,y-4],[x+w-3,y-4],[x+w+2,y+1]],evening ? "#6b6369" : "#63746e");
+    rect(x+w-8,y+2,3,5,dark);
+  };
+  roof(169,62,14); roof(189,63,10); roof(313,62,16); roof(341,63,13);
+  function pole(x,y,h) {
+    rect(x,y,2,h,ink); rect(x-6,y+2,14,2,ink);
+    rect(x-5,y,2,3,"#7c8577"); rect(x+5,y,2,3,"#7c8577");
+  }
+  const bank = () => {
+    rect(0,83,384,29,green);
+    rect(0,82,384,2,evening ? "#ac9973" : "#b2ac71");
+    for (let i=0;i<100;i++) {
+      const x=Math.floor(noise(i+187)*384),y=88+Math.floor(noise(i+88)*23);
+      rect(x,y,1+Math.floor(noise(i+70)*4),1,i%2 ? dark : "#889260");
+    }
+  };
+  const rail = (y) => {
+    rect(0,y,384,18,"#79765f");
+    for (let x=-9;x<395;x+=14) {
+      polygon([[x+4,y],[x+9,y],[x+4,y+15],[x-2,y+15]],"#635f50");
+      rect(x+10,y+7,2,1,"#a2a087");
+    }
+    for (const off of [1,10]) { rect(0,y+off,384,3,"#515759"); rect(0,y+off,384,1,"#bcaf93"); }
+  };
+  const water = (y) => {
+    rect(0,y,384,112-y,evening ? "#a58b89" : "#85aaa2");
+    for (let i=0;i<94;i++) {
+      const x=noise(i+258)*383+Math.sin(phase*.4+i)*1.5,cy=y+Math.floor(noise(i+399)*(111-y));
+      rect(x,cy,2+Math.floor(noise(i+71)*18),1,i%3 ? (evening?"#bf9c8b":"#b9c9aa") : (evening?"#827c85":"#6f9894"));
+    }
+  };
+  function grasses(x,y,n) {
+    for(let j=0;j<n;j++){
+      const x0=x+j*3, h=4+Math.floor(noise(j+x)*12), bend=Math.round(dx);
+      line(x0,y,x0-2+bend,y-h, j%2 ? dark : green);
+      if(j%3===0) rect(x0-3+bend,y-h-3,2,5,evening ? "#896d65" : "#9e8256");
+    }
+  }
+  if (place === "station") {
+    bank(); rail(98);
+    rect(0,83,219,15,"#848572"); rect(0,81,219,3,"#d9c399"); rect(0,85,217,2,"#59645b");
+    for(let x=0;x<218;x+=13)rect(x,90+(x%3),8,1,"#a39d81");
+    rect(20,39,100,42,"#a28766"); rect(22,43,96,19,"#dacfaa");
+    for(let y=63;y<80;y+=4)rect(22,y,96,1,"#806d55");
+    for(const x of [23,51,83,116])rect(x,42,3,39,"#675e4e");
+    rect(30,49,16,13,"#384e50"); rect(31,50,14,10,"#7c9e94"); rect(37,49,2,14,"#596a5e");
+    rect(58,48,18,33,"#4d594e"); rect(62,51,10,16,"#88a79a"); rect(65,52,2,14,"#b3bca2");
+    rect(88,49,22,13,"#526c67"); rect(89,50,20,9,"#93ada0"); rect(99,49,2,13,"#626a57");
+    polygon([[9,39],[26,22],[107,22],[128,39]],"#455b5a");
+    polygon([[24,25],[28,21],[105,21],[109,25]],"#697b70");
+    for(let x=25;x<108;x+=7)line(x,25,x-7,37,"#506865");
+    rect(7,38,123,3,ink); rect(13,41,112,2,"#958366"); rect(115,42,3,39,"#655f4e");
+    rect(64,41,21,6,"#eee0b8"); rect(66,43,16,1,"#7e7861");
+    rect(135,67,24,2,"#925f45"); rect(135,71,24,3,"#8c654c");
+    rect(137,73,2,8,ink); rect(155,73,2,8,ink);
+    pole(237,32,50); pole(302,48,25); pole(346,54,16);
+    line(118,21,237,34,ink); line(237,34,269,44,ink); line(269,44,302,50,ink); line(302,50,346,56,ink);
+    rect(190,58,2,23,ink); rect(185,56,13,5,"#ddd0a8"); rect(186,58,11,1,green);
+    grasses(295,98,11);
+  } else if (place === "bridge" || evening) {
+    water(75);
+    for(const x of [40,145,250,355]){ rect(x,74,10,26,"#797a6e"); rect(x-2,76,15,3,"#a29a82"); rect(x+7,79,4,23,"#646e68");}
+    const iron=evening?"#6c535a":"#924f45", light=evening?"#ad7869":"#b26b53";
+    rect(0,70,384,7,iron); rect(0,69,384,2,"#4b514b");
+    for(let x=-19;x<395;x+=52) {
+      line(x,68,x+26,40,iron,3); line(x+26,40,x+52,68,iron,3);
+      line(x+1,68,x+26,41,light); line(x+27,41,x+52,68,light);
+      rect(x+26,41,2,29,iron); rect(x+23,39,10,3,iron);
+    }
+    rect(0,39,384,3,iron); rect(0,38,384,1,light);
+    for(let x=2;x<384;x+=11)rect(x,73,1,1,"#dbb288");
+    polygon([[0,89],[25,87],[50,94],[65,104],[90,112],[0,112]],dark);
+    grasses(0,100,15); grasses(351,111,11);
+  } else if (place === "crossing") {
+    bank(); rail(90);
+    polygon([[167,82],[193,82],[224,112],[144,112]],"#c2b894");
+    for(let x=158;x<218;x+=5)line(x,95,x-4,104,"#9c937b");
+    pole(33,18,68); pole(122,40,41); pole(208,50,23);
+    line(0,11,33,20,ink); line(33,20,76,34,ink); line(76,34,122,42,ink); line(122,42,208,52,ink);
+    rect(90,31,5,54,ink);
+    for(let y=32;y<83;y+=11)rect(90,y,5,5,"#e7b64e");
+    line(82,18,101,37,ink,4); line(82,37,101,18,ink,4);
+    for(let j=0;j<4;j++){line(82+j*5,18+j*5,84+j*5,20+j*5,"#e8b84f",3);line(82+j*5,37-j*5,84+j*5,35-j*5,"#e8b84f",3);}
+    rect(82,44,23,7,ink); disc(86,47,2,"#d56943"); disc(100,47,2,"#994d41");
+    rect(97,72,62,3,ink); for(let x=100;x<155;x+=11)rect(x,72,6,3,"#deaf50");
+    grasses(239,91,14);
+  } else {
+    water(77);
+    polygon([[0,71],[56,77],[102,83],[155,89],[196,91],[246,100],[282,112],[0,112]],green);
+    polygon([[0,80],[51,80],[86,87],[153,94],[188,95],[228,104],[253,112],[0,112]],"#a39e73");
+    for(const [x,y,n] of [[0,81,18],[49,87,14],[98,93,14],[226,107,15],[350,111,12]])grasses(x,y,n);
+    if(place==="lamp"){
+      rect(93,24,3,65,ink); line(93,24,110,22,ink,2);
+      rect(107,22,6,4,ink); rect(106,26,8,5,"#e7bf72"); rect(105,25,10,2,dark);
+      rect(107,31,6,1,ink); rect(89,87,10,3,"#747c65");
+    }
+  }
+  const bird = (x,y) => {
+    rect(x+1,y+3,9,4,"#414f51"); rect(x+6,y,4,5,ink); rect(x+7,y+1,2,2,"#e2d3a5");
+    rect(x+10,y+2,3,1,"#c58e51"); rect(x+1,y+4,5,2,"#688684"); rect(x-2,y+2,4,2,ink);
+    rect(x+6,y+7,1,2,ink);
+  };
+  const frog = (x,y) => {
+    rect(x,y+2,9,4,"#4e6a46"); rect(x+3,y,6,3,"#779448"); rect(x+5,y,2,1,"#e7d790");
+    rect(x+1,y+3,5,1,"#a6b76a"); rect(x-1,y+6,5,1,dark); rect(x+7,y+5,3,1,dark);
+  };
+  const fly = (x,y) => {
+    x+=Math.round(dx*2); y+=Math.round(Math.sin(.7+phase)*2);
+    rect(x-1,y-1,1,1,"#eee4aa");rect(x+1,y-1,1,1,"#eee4aa");rect(x,y,1,2,ink);
+    rect(x,y+2,2,2,dx>0?"#fff2a1":"#dbcd70");
+  };
+  const hero = (x,y) => {
+    rect(x+2,y+1,6,4,"#7a664d"); rect(x+1,y+3,9,2,"#dbb368"); rect(x+3,y+5,5,4,"#d5a475");
+    rect(x+3,y+5,2,3,ink); rect(x+7,y+6,1,1,ink); rect(x+1,y+9,6,6,"#bd7952");
+    rect(x,y+9,3,5,"#705449");rect(x+7,y+10,2,4,"#c59568");
+    rect(x+2,y+15,2,4,ink);rect(x+5,y+15,2,4,ink);rect(x+2,y+18,3,1,ink);rect(x+5,y+18,3,1,ink);
+  };
+  const hx=place==="station"?168:place==="crossing"?165:(place==="bridge"||evening)?186:127;
+  const hy=place==="station"?62:place==="crossing"?73:(place==="bridge"||evening)?50:73;
+  hero(hx,hy);
+  if(place==="crossing" || place==="station") bird(place==="station"?136:119, place==="station"?59:32);
+  if(place==="reeds")frog(185,86);
+  if(place==="lamp")for(let j=0;j<7;j++)fly(70+Math.floor(noise(j+829)*90),45+Math.floor(noise(j+87)*29));
+  if(companions.includes("bird"))bird(hx-12,hy+8);
+  if(companions.includes("frog"))frog(hx+14,hy+12);
+  if(companions.includes("fly"))fly(hx+11,hy+1);
+  ctx.restore();
+}
+const species = {
+  bird:{name:'カンカン鳥',site:'踏切',place:'crossing',pitch:'高',length:1,sign:'高い声',syllable:'カン',line:'遮断機の鐘に、小さな鳥がもう一つの鐘を返した。',reply:'白い尾を跳ね上げ、小鳥が調査鞄に止まった。',calls:[[1,0,1,0],[0,1,1,0]],pixels:['.............','........oo...','.......owko..','..o...oowwyaa','..ooobbbwwa..','...obbbwww...','....owwwwo...','.....oooo....','.....a.a.....','....aa.aa....']},
+  frog:{name:'ヨシブエ蛙',site:'葦の水路',place:'reeds',pitch:'低',length:2,sign:'低い声',syllable:'ポォ',line:'葦の間から低い笛の音。水面にまるい波紋が広がった。',reply:'笛を吹いていた蛙が、長靴の上にひらりと飛び乗った。',calls:[[1,1,0,0],[0,1,0,1]],pixels:['.............','...oo...oo...','..ogwo.ogwo..','..ogkooogko..','..ogggggggo..','..oyogggoyo..','.oggyoooyggo.','.ogggyyygggo.','oggoooooooggo','ooo.......ooo']},
+  fly:{name:'アメツブ蛍',site:'信号灯',place:'lamp',pitch:'低',length:1,sign:'低い声',syllable:'リン',line:'消えた信号灯の内側に、一粒の灯り。羽音に合わせて明滅している。',reply:'金色の灯りがひとつ、手帳の端でついたり消えたりした。',calls:[[0,1,0,0],[1,0,0,1]],pixels:['.............','....o...o....','.....o.o.....','.....ooo.....','..wwobbboww..','.wbbobbbobbw.','..wwooyooww..','.....oyyo....','.....oyyo....','......oo.....']}
+};
+const colors={o:'#30483b',w:'#fff0c7',k:'#1c312f',a:'#ca6939',b:'#667950',y:'#edbd53',g:'#7d9c5c'};
+const ids=Object.keys(species);
+const bridgeTunes=[['*','高','低','低'],['低','低','*','高'],['低','高','高','*']];
+const labels={station:'第一駅　雨待駅',crossing:'雨待駅　東の踏切',reeds:'雨待駅　葦の水路',lamp:'雨待駅　古い信号灯',bridge:'雨待駅　夕凪鉄橋',ending:'夕凪鉄橋　沿線開通'};
+const page=document.getElementById('page'), log=document.getElementById('log'), soundButton=document.getElementById('sound'), canvas=document.getElementById('scenery');
+const defaultLens=()=>Object.fromEntries(ids.map(id=>[id,species[id].length]));
+let found=[], lengths=defaultLens(), clears=0;
+const storageKey='nakisen-station-1-v1';
+try{
+  const saved=JSON.parse(localStorage.getItem(storageKey)||'null');
+  if(saved && Array.isArray(saved.found)){
+    found=ids.filter(id=>saved.found.includes(id));
+    for(const id of found) if(saved.lengths && [1,2].includes(saved.lengths[id])) lengths[id]=saved.lengths[id];
+    if(Number.isSafeInteger(saved.clears) && saved.clears>0) clears=saved.clears;
+  }
+}catch{}
+function save(){try{localStorage.setItem(storageKey,JSON.stringify({found,lengths,clears}));}catch{}}
+const crew=[], notes=[];
+let screen='station', subject='', activeVoice='', measure=0, message='', misses=0, lastCrew=[], muted=true, audio=null, playback=0, landscape='station';
+function icon(id,large=false){
+  const rows=species[id].pixels;
+  const paths=Object.entries(colors).map(([key,color])=>{
+    let d='';
+    rows.forEach((row,y)=>Array.from(row).forEach((pixel,x)=>{if(pixel===key)d+='M'+x+' '+y+'h1v1h-1z';}));
+    return '<path fill="'+color+'" d="'+d+'"/>';
+  }).join('');
+  return '<span class="'+(large?'bigicon':'badge')+'" aria-hidden="true"><svg viewBox="-1 -1 15 12" shape-rendering="crispEdges">'+paths+'</svg></span>';
+}
+function button(action,label,css='quiet',value='',extra=''){
+  return '<button type="button" class="'+css+'" data-action="'+action+'" data-value="'+value+'" '+extra+'>'+label+'</button>';
+}
+function notice(){return '<div class="feedback'+(message?' notice':'')+'" role="status">'+message+'</div>';}
+function redrawArt(place,phase=0){
+  landscape=place;
+  document.getElementById('postmark').textContent=labels[place];
+  canvas.setAttribute('aria-label',labels[place]+'の風景');
+  paintStation(canvas,place,found,phase);
+}
+function stopPlayback(){
+  playback++;
+  document.querySelectorAll('.lit').forEach(el=>el.classList.remove('lit'));
+}
+function noteTone(freq,duration,voice='sine'){
+  if(muted || !audio) return;
+  try{
+    const osc=audio.createOscillator(), gain=audio.createGain(), t=audio.currentTime;
+    osc.type=voice; osc.frequency.setValueAtTime(freq,t);
+    gain.gain.setValueAtTime(.001,t); gain.gain.exponentialRampToValueAtTime(.095,t+.015); gain.gain.exponentialRampToValueAtTime(.001,t+duration);
+    osc.connect(gain); gain.connect(audio.destination); osc.start(); osc.stop(t+duration+.02);
+  }catch{}
+}
+async function toggleSound(){
+  if(muted){
+    try{
+      const Audio=window.AudioContext||window.webkitAudioContext;
+      if(!Audio) throw Error();
+      if(!audio) audio=new Audio();
+      await audio.resume(); muted=false; noteTone(554,.12);
+    }catch{soundButton.textContent='音：利用不可';return;}
+  }else{muted=true;}
+  soundButton.textContent=muted?'音：切':'音：入'; soundButton.setAttribute('aria-pressed',String(!muted));
+}
+function playBar(withAnswers){
+  stopPlayback(); const serial=playback, bridge=screen==='bridge';
+  const pattern=bridge?bridgeTunes[measure]:species[subject].calls[measure];
+  for(let i=0;i<4;i++){
+    setTimeout(()=>{
+      if(serial!==playback)return;
+      document.querySelectorAll('.lit').forEach(el=>el.classList.remove('lit'));
+      document.querySelectorAll('[data-column="'+i+'"]').forEach(el=>el.classList.add('lit'));
+      if(bridge){
+        if(pattern[i]==='*')noteTone(293,.18);
+        else if(!withAnswers)noteTone(pattern[i]==='高'?660:196,.19,'triangle');
+      }else if(pattern[i])noteTone(subject==='bird'?740:subject==='frog'?196:330,.23,'triangle');
+      if(withAnswers){
+        const n=notes.find(n=>n.start===i);
+        if(n)noteTone(n.voice==='cricket'?988:species[n.voice].pitch==='高'?660:196,.3*n.len,n.voice==='cricket'?'triangle':'sine');
+      }
+    },i*350);
+  }
+  setTimeout(()=>{if(serial===playback)document.querySelectorAll('.lit').forEach(el=>el.classList.remove('lit'));},1400);
+}
+function heading(kicker,title,text){
+  return '<div class="kicker">'+kicker+'</div><h2 tabindex="-1">'+title+'</h2><p class="lead">'+text+'</p>';
+}
+function renderLog(){
+  log.innerHTML='<div class="loghead"><h2>観察ノート</h2><span class="count">'+found.length+' / 3 種</span></div>'+ids.map(id=>{
+    const s=species[id], known=found.includes(id);
+    return '<div class="logitem">'+(known?icon(id):'<span class="badge hidden" aria-hidden="true">◇</span>')+'<div><b>'+(known?s.name:'未記録')+'</b><small>'+(known?s.sign+'・'+lengths[id]+'拍':s.site+'で調査')+'</small></div></div>';
+  }).join('')+'<p class="lognote">'+(clears?'夕凪鉄橋を '+clears+' 回開通。':'鉄橋の群れは、高い声と低い声を待っている。')+'</p>';
+}
+function station(){
+  return heading('第一駅 ／ 沿線調査','雨待駅の朝','調査鞄には、相棒の鈴虫。合図を送ると「リリ」と鳴く。鉄橋を渡るために、まずは線路沿いの鳴き声を聴き、鈴虫と一緒に仲間を探そう。')+
+    '<div class="places">'+ids.map(id=>button('visit',icon(id,true)+'<b>'+species[id].site+'</b><small>'+(found.includes(id)?'もう一度会う':'鳴き声を調べる')+'</small>','place',id)).join('')+'</div>'+
+    button('party','<span>夕凪鉄橋へ　→</span><small>'+(found.includes('bird') && found.length>=2?'合唱を組む':'高音・低音の仲間が必要')+'</small>','gate','',''+(!found.includes('bird')||found.length<2?'disabled':''))+
+    notice();
+}
+function partners(){
+  return heading('夕凪鉄橋 ／ 編成','鉄橋に呼ぶ二匹','群れが道をあけるには、高音と低音が一匹ずつ必要。声の長さは演奏中も変えられる。')+
+    '<div class="team">'+found.map(id=>button('crew',icon(id,true)+'<b>'+species[id].name+'</b><small>'+(crew.includes(id)?'● 選択中':'○ 選ぶ')+' ・ '+species[id].sign+'</small>','teamcard',id,'aria-pressed="'+crew.includes(id)+'"')).join('')+'</div>'+
+    notice()+'<div class="toolrow">'+button('depart','鉄橋の合唱へ','primary','',''+(crew.length===2 && crew.some(id=>species[id].pitch==='高') && crew.some(id=>species[id].pitch==='低')?'':'disabled'))+button('home','駅へ戻る')+'</div>';
+}
+function ribbon(bridge){
+  const pattern=bridge?bridgeTunes[measure]:species[subject].calls[measure];
+  const sourceCells=pattern.map((v,i)=>{
+    const call=bridge?v==='*':!!v;
+    return '<div class="source'+(call?' called':'')+'" data-column="'+i+'">'+(call?(bridge?'群れ':species[subject].syllable):bridge?v+'音':'休み')+'</div>';
+  }).join('');
+  const scoreCells=pattern.map((_,i)=>{
+    const n=notes.find(n=>i>=n.start&&i<n.start+n.len);
+    const label=n?(bridge?species[n.voice].pitch+'音':'リリ'):'＋';
+    return button('beat',label+'<small>'+ (n && n.start!==i?'つづき':(i+1)+' 拍目')+'</small>','beat'+(n?' filled':''),String(i),'data-column="'+i+'" aria-label="'+(i+1)+'拍目 '+(n?label:'空き')+'" aria-pressed="'+!!n+'"');
+  }).join('');
+  return '<div class="score"><div class="subhead"><strong class="section-label">四拍の譜面</strong>'+button('listen',bridge?'手本を聴く':'鳴き声を聴く','replay')+'</div><div class="rhythms"><div class="label">'+(bridge?'手本':'相手')+'</div>'+sourceCells+'<div class="label">'+(bridge?'合唱':'鈴虫')+'</div>'+scoreCells+'</div></div>';
+}
+function task(){
+  const bridge=screen==='bridge', s=species[subject];
+  const intro=bridge?'上の譜面に合わせ、高音・低音を置こう。「群れ」の拍は空ける。一匹が歌えるのは小節に一度。':'相手の「休み」の拍だけ、下の＋を押して鈴虫に合図しよう。もう一度押すと合図を消せる。';
+  let html=heading((bridge?'鉄橋の合唱':'生きもの調査')+' ／ 第 '+(measure+1)+' 小節・全 '+(bridge?3:2)+' 小節',bridge?'夕凪鉄橋の合唱':s.site+'の'+s.name,bridge?intro:s.line+' '+intro);
+  if(bridge){
+    html+='<div class="section-label">歌い手を選ぶ</div><div class="voices">'+crew.map(id=>button('selectvoice',species[id].name+'　'+species[id].pitch+lengths[id]+'拍','voice',id,'aria-pressed="'+(activeVoice===id)+'"')).join('')+'</div>'+
+      button('length',species[activeVoice].name+'の声を '+(lengths[activeVoice]===1?2:1)+' 拍にする','tune')+
+      '<p class="fine">声を整えると、選んだ歌い手の音を置き直せる。</p>';
+  }
+  return html+ribbon(bridge)+notice()+'<div class="toolrow">'+button('check',bridge?'合唱を届ける':'返事を届ける','primary')+button('preview','合わせて聴く')+button('home','駅へ戻る')+'</div>';
+}
+function joined(){
+  const s=species[subject];
+  return heading('観察記録 ／ '+s.site,s.name+'と合流',s.reply)+'<div class="ending">'+icon(subject,true)+'<b>'+s.name+'</b>　'+s.sign+' ・ '+lengths[subject]+'拍<br><span class="fine">手帳に鳴き声を記録した。鉄橋では声を一拍にも二拍にも伸ばせる。</span></div>'+button('home','駅へ戻る','primary');
+}
+function ending(){
+  return heading('第一駅 ／ 調査完了','夕凪鉄橋、開通。','最後の音が川面に消えた。渡り鳥は一本の線になって夕空へ。対岸の駅員が腕木信号を上げると、鞄の鈴虫が小さく「リリ」と鳴いた。')+'<div class="ending"><b>雨待駅　開通印</b><br>'+lastCrew.map(id=>species[id].name).join(' と ')+'の合唱<br><span class="fine">三小節を演奏　／　やり直し '+misses+' 回　／　観察記録 '+found.length+' 種</span></div><div class="toolrow">'+button('party','もう一度、合唱する','primary')+button('home','沿線を歩く')+'</div>';
+}
+function render(moveFocus=false){
+  const old=document.activeElement, action=old?.dataset?.action, value=old?.dataset?.value;
+  const fn={station,encounter:task,joined,party:partners,bridge:task,ending}[screen];
+  page.innerHTML=fn(); renderLog();
+  const place=screen==='ending'?'ending':screen==='bridge'||screen==='party'?'bridge':screen==='station'?'station':species[subject].place;
+  redrawArt(place);
+  if(moveFocus)page.querySelector('h2').focus({preventScroll:true});
+  else if(action) [...page.querySelectorAll('button')].find(b=>b.dataset.action===action&&b.dataset.value===value)?.focus({preventScroll:true});
+}
+function changeScreen(next){
+  message='';stopPlayback();screen=next;render(true);
+}
+function resetBar(){notes.length=0;message='';stopPlayback();}
+function placeNote(pos){
+  const prior=notes.find(n=>pos>=n.start&&pos<n.start+n.len);
+  if(prior){notes.splice(notes.indexOf(prior),1);message='';}
+  else{
+    const bridge=screen==='bridge', voice=bridge?activeVoice:'cricket', len=bridge?lengths[voice]:1;
+    if(pos+len>4){message='この声は小節からはみ出す。前の拍に置くか、一拍に縮めよう。';render();return;}
+    const other=notes.filter(n=>!bridge||n.voice!==voice);
+    if(other.some(n=>pos<n.start+n.len && n.start<pos+len)){message='その場所はほかの声と重なる。先に別の拍を選ぼう。';render();return;}
+    if(bridge){const old=notes.find(n=>n.voice===voice);if(old)notes.splice(notes.indexOf(old),1);}
+    notes.push({start:pos,len,voice});message='';
+    noteTone(!bridge?988:species[voice].pitch==='低'?196:587,.12,!bridge?'triangle':'sine');
+  }
+  render();
+}
+function judge(){
+  const bridge=screen==='bridge';
+  const pattern=bridge?bridgeTunes[measure]:species[subject].calls[measure];
+  for(let i=0;i<4;i++){
+    const n=notes.find(n=>i>=n.start&&i<n.start+n.len);
+    const needsQuiet=bridge?pattern[i]==='*':!!pattern[i];
+    if((needsQuiet&&n)||(!needsQuiet&&!n)||(!needsQuiet&&bridge&&species[n.voice].pitch!==pattern[i])){
+      if(bridge)misses++;
+      message=(i+1)+'拍目を確認しよう。'+(needsQuiet?'相手が鳴くので、こちらは休み。':bridge?'ここでは'+pattern[i]+'い声が聴こえる。':'相手の休みに、鈴虫の「リリ」で返事をしよう。');render();return;
+    }
+  }
+  if(measure+1<(bridge?3:2)){
+    measure++;resetBar();message=bridge?'合図が届いた。群れが少しずつ動き始めた。':'返事が届いた。もう一度、違う節で呼んでいる。';noteTone(698,.22);render();return;
+  }
+  if(bridge){
+    lastCrew=crew.slice();clears++;save();changeScreen('ending');noteTone(880,.35);
+  }else{
+    if(!found.includes(subject))found.push(subject);save();changeScreen('joined');noteTone(784,.28);
+  }
+}
+function act(action,value){
+  if(action==='listen'||action==='preview'){playBar(action==='preview');return;}
+  stopPlayback();
+  switch(action){
+    case 'visit':subject=value;measure=0;resetBar();changeScreen('encounter');break;
+    case 'home':changeScreen('station');break;
+    case 'party':
+      if(!found.includes('bird')||found.length<2)return;
+      if(!crew.length)crew.push('bird',found.find(id=>id!=='bird'));
+      changeScreen('party');break;
+    case 'crew':{
+      const idx=crew.indexOf(value);
+      if(idx!==-1)crew.splice(idx,1);
+      else if(crew.length===2){message='先に一匹外してから、歌い手を選ぼう。';render();break;}
+      else crew.push(value);
+      message='';render();break;
+    }
+    case 'depart':
+      if(crew.length!==2||!crew.some(id=>species[id].pitch==='高')||!crew.some(id=>species[id].pitch==='低'))return;
+      activeVoice=crew[0];measure=0;misses=0;resetBar();changeScreen('bridge');break;
+    case 'selectvoice':activeVoice=value;message='';render();break;
+    case 'length':{
+      lengths[activeVoice]=lengths[activeVoice]===1?2:1;
+      const old=notes.find(n=>n.voice===activeVoice);if(old)notes.splice(notes.indexOf(old),1);
+      message=species[activeVoice].name+'の声が'+lengths[activeVoice]+'拍になった。';save();render();break;
+    }
+    case 'beat':placeNote(Number(value));break;
+    case 'check':judge();break;
+  }
+}
+soundButton.addEventListener('click',toggleSound);
+page.addEventListener('click',e=>{
+  const b=e.target.closest('button[data-action]');
+  if(b && !b.disabled)act(b.dataset.action,b.dataset.value);
+});
+document.addEventListener('keydown',e=>{
+  if(e.altKey||e.metaKey||e.ctrlKey||e.repeat||!['encounter','bridge'].includes(screen))return;
+  if(/^[1-4]$/.test(e.key)){e.preventDefault();act('beat',String(Number(e.key)-1));}
+});
+render();
+if(!window.matchMedia('(prefers-reduced-motion: reduce)').matches){
+  let phase=0;
+  setInterval(()=>{if(!document.hidden)redrawArt(landscape,++phase*.5);},500);
+}
+</script>
+</body>
+</html>
