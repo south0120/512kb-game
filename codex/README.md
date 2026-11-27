@@ -1,15 +1,16 @@
 # 512KBゲーム企画帳
 
-**全48案。** 4秒で指が動くミクロゲームから、最後の町まで何時間も一緒に旅をするRPGまで。最初の2本をブラウザで遊べる。
+**全48案。** 4秒で指が動くミクロゲームから、最後の町まで何時間も一緒に旅をするRPGまで。企画から生まれた2本に、クリスマスのミニゲームが加わった。
 
 ## 遊べるゲーム
 
 | ゲーム | 遊び方 | ダウンロード |
 |---|---|---|
+| [聖夜のえんとつ便](games/santa-express/index.html) | 雪の街を飛ぶサンタのそりから、煙突を狙ってプレゼントを落とす。 | [えんとつ便のZIP](https://github.com/south0120/512kb-game/raw/refs/heads/main/codex/dist/santa-express.zip) |
 | [パキッ！ドバイショコラ](games/dubai-chocolat/index.html) | ピスタチオの粒を数えて板チョコを折り、注文に合う一片を包装する。カダイフの筋を残せば好成績。 | [ショコラのZIP](https://github.com/south0120/512kb-game/raw/refs/heads/main/codex/dist/dubai-chocolat.zip) |
 | [鳴き線のフィールドノート](games/nakisen/index.html) | 第一駅。動物の声に返事をして仲間を集め、合唱で鉄橋を渡る。拍は画面でも読める。 | [鳴き線のZIP](https://github.com/south0120/512kb-game/raw/refs/heads/main/codex/dist/nakisen.zip) |
 
-好きな方のZIPを展開し、中の `index.html` をブラウザで開くとスタート。どちらもこの1枚でオフラインで遊べる。リポジトリから直接遊ぶ場合は、各ゲームのフォルダ内にある同じHTMLを開く。配布版は `python3 codex/pack.py` で作り直せる。
+好きなゲームのZIPを展開し、中の `index.html` をブラウザで開くとスタート。各ゲームともこの1枚でオフラインで遊べる。リポジトリから直接遊ぶ場合は、各ゲームのフォルダ内にある同じHTMLを開く。配布版は `python3 codex/pack.py` で作り直せる。
 
 ## 最初に遊び比べたい4本
 
