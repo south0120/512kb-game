@@ -130,8 +130,8 @@ const wait = n => new Promise(r => timers.push([fr + n, r]));
 
 // ---------- じょうたい ----------
 // G: セーブされるもの。P: 主人公。cur: いまの へやの 80マス。E: てき・おとしもの。
-let G, cur = [], rid = 0, th = 0, dark = 0, E = [], sw = [], shots = [], parts = [], slide = 0, seal = 0, tr = 0, dlg = 0, busy = 0, fade = 0, scene = 0, mapOn = 0, told = {};
-const P = { x: 0, y: 0, d: 0, sw: 0, lt: 0, inv: 0, kb: 0, kx: 0, ky: 0, push: 0, wf: 0, get: 0, sid: 0 };
+let G, cur = [], rid = 0, th = 0, dark = 0, E = [], sw = [], shots = [], parts = [], slide = 0, seal = 0, auto = 0, tr = 0, dlg = 0, busy = 0, fade = 0, scene = 0, mapOn = 0, told = {};
+const P = { x: 0, y: 0, d: 0, sw: 0, lt: 0, inv: 0, safe: 0, kb: 0, kx: 0, ky: 0, push: 0, wf: 0, get: 0, sid: 0 };
 const old = cnv(W, 128), dk = cnv(W, 128), DK = dk.getContext('2d');
 const gi = i => ((rid >> 2) * 8 + (i / 10 | 0)) * 40 + (rid & 3) * 10 + i % 10;
 const FLR = '.,_ =';
@@ -151,7 +151,7 @@ function spawn(t, x, y) {
 function enter(r) {
   rid = r; th = r < 12 ? 0 : r < 20 ? 1 : r < 28 ? 2 : 3;
   dark = DARK.includes(r);
-  E = []; sw = []; shots = []; parts = []; slide = seal = 0; told = {};
+  E = []; sw = []; shots = []; parts = []; slide = seal = auto = 0; told = {};
   const solved = G.S[r];
   for (let i = 0; i < 80; i++) {
     let ch = G.P[gi(i)] || MAP[gi(i)];
@@ -187,7 +187,7 @@ function drawRoom(g) {
 // ---------- あたりはんてい ----------
 const tileAt = (px, py) => { const tx = px >> 4, ty = py >> 4; return tx < 0 || ty < 0 || tx > 9 || ty > 7 ? -1 : tx + ty * 10; };
 // 主人公用: へやの そとは、はしの マスが あるけるなら とおれる (となりの へやへ)
-const solid = (px, py) => SOLID.includes(cur[Math.min(9, Math.max(0, px >> 4)) + Math.min(7, Math.max(0, py >> 4)) * 10]);
+const solid = (px, py) => { const c = cur[Math.min(9, Math.max(0, px >> 4)) + Math.min(7, Math.max(0, py >> 4)) * 10]; return SOLID.includes(c) || P.kb && isW(c); };
 const free = (x, y) => !solid(x + 3, y + 8) && !solid(x + 12, y + 8) && !solid(x + 3, y + 15) && !solid(x + 12, y + 15);
 // てき用: へやの そとは かべ
 const efree = (e, x, y) => [[2, 4], [13, 4], [2, 15], [13, 15]].every(([a, b]) => { const i = tileAt(x + a, y + b); return i >= 0 && !SOLID.includes(cur[i]); });
@@ -256,7 +256,7 @@ async function warp(ch) {
   enter((gx / 10 | 0) + (gy >> 3) * 4);
   const i = gx % 10 + gy % 8 * 10, n = [10, -10, 1, -1].find(d => !SOLID.includes(cur[i + d]) && cur[i + d] != null && !isW(cur[i + d]));
   P.x = (i + n) % 10 * 16; P.y = ((i + n) / 10 | 0) * 16 - 4; P.d = n == 10 ? 0 : n == -10 ? 1 : n == 1 ? 3 : 2;
-  P.inv = 50; checkpoint();
+  P.safe = 50; checkpoint();
   await fadeTo(0);
   busy--;
 }
@@ -265,14 +265,14 @@ async function die() {
   music(-1); sfx.dead();
   await wait(60); await fadeTo(1);
   G.dth++;
-  await say('ともしびが きえかけた… でも まだ おわれない');
+  await say('めのまえが くらくなる… でも、 まだ おわれない');
   G.hp = G.mh;
-  enter(G.c[0]); P.x = G.c[1]; P.y = G.c[2]; P.inv = P.kb = 0;
+  enter(G.c[0]); P.x = G.c[1]; P.y = G.c[2]; P.inv = P.kb = 0; P.safe = 50;
   await fadeTo(0);
   busy--;
 }
 function hurt(n, fx, fy) {
-  if (P.inv || busy) return;
+  if (P.inv || P.safe || busy) return;
   G.hp -= n; P.inv = 70; P.kb = 8; sfx.hurt();
   const d = Math.hypot(P.x - fx, P.y - fy) || 1;
   P.kx = (P.x - fx) / d; P.ky = (P.y - fy) / d;
@@ -289,7 +289,7 @@ async function bossDown(e) {
   G.mh += 2; G.hp = G.mh; G.s++;
   P.d = 0; P.get = SHARD; sfx.shard();
   await wait(110);
-  await say('あかりの かけらを てにいれた！ （' + DIG[G.s] + '／３）|ともしびも ひとつ ふえた' + (G.s < 3 ? '|' + NEXT[G.s] : ''));
+  await say(SHARDS[G.s - 1]);
   P.get = 0;
   save();
   if (G.s > 2) await ending(); else music(1);
@@ -353,7 +353,13 @@ function update() {
   G.t++;
   let dx = (held.R ? 1 : 0) - (held.L ? 1 : 0), dy = (held.D ? 1 : 0) - (held.U ? 1 : 0);
   if (P.inv) P.inv--;
-  if (P.kb) { P.kb--; tryMove(P.kx * 2.5, 0); tryMove(0, P.ky * 2.5); dx = dy = 0; }
+  if (P.safe) P.safe--;
+  // ヌシの へやでは かってに なかまで すすむ (そのあと でぐちが しまる)
+  if (auto) { P.wf++; P.x += DX[P.d]; P.y += DY[P.d]; if (P.x > 20 && P.x < 124 && P.y > 14 && P.y < 90) auto = 0; return; }
+  if (P.kb) {
+    tryMove(P.kx * 2.5, 0); tryMove(0, P.ky * 2.5); P.kb--; dx = dy = 0;
+    P.x = Math.max(-6, Math.min(150, P.x)); P.y = Math.max(-10, Math.min(114, P.y));
+  }
   if (P.sw) {
     P.sw--; dx = dy = 0;
     if (P.sw > 2 && P.sw < 13) {
@@ -394,6 +400,8 @@ function update() {
     // でぐちに いわが あれば となりへ よける
     for (let k = 0; k < 17 && !free(P.x, P.y); k++) for (const s of [-k, k]) if (free(P.x + (ey ? s : 0), P.y + (ex ? s : 0))) { P.x += ey ? s : 0; P.y += ex ? s : 0; break; }
     tr = { x: ex, y: ey, t: 0 };
+    P.safe = 50;
+    if (BOSSR[rid] != null && !G.S[rid]) { auto = 1; P.d = ey > 0 ? 0 : ey < 0 ? 1 : ex < 0 ? 2 : 3; }
     if (!th) checkpoint();
     return;
   }
@@ -511,7 +519,7 @@ function drawGame() {
   X.restore();
   // うえの じょうほう
   R(0, 0, W, 16, '0');
-  for (let i = 0; i < G.mh / 2; i++) spr(G.hp >= i * 2 + 2 ? IC.h : IC.e, 4 + i * 8, 4), G.hp == i * 2 + 1 && X.drawImage(IC.h, 0, 4, 8, 4, 4 + i * 8, 8, 8, 4);
+  for (let i = 0; i < G.mh / 2; i++) spr(G.hp >= i * 2 + 2 ? IC.h : IC.e, 4 + i * 8, 4), G.hp == i * 2 + 1 && X.drawImage(IC.h, 0, 0, 4, 8, 4 + i * 8, 4, 4, 8);
   G.it[1] && spr(IC.l, 84, 4); G.it[2] && spr(IC.b, 94, 4);
   if (G.k) { spr(IC.k, 106, 4); T(G.k, 171, 7); }
   for (let i = 0; i < 3; i++) spr(i < G.s ? IC.s : IC.o, 130 + i * 9, 4);

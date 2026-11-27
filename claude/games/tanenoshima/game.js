@@ -1,4 +1,4 @@
-// タネノシマ — 32KB縛りの収集RPG。絵・地形・生き物・音はすべてタネ(シード)から生成する。
+// タネノシマ — 512KB縛りの収集RPG。絵・地形・生き物・音はすべてタネ(シード)から生成する。
 const W = 160, H = 144, N = 72;
 const cv = document.getElementById('c'), cx = cv.getContext('2d');
 let S = 3, FONT = '';
