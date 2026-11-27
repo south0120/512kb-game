@@ -125,7 +125,7 @@ document.querySelectorAll('[data-k]').forEach(b => {
 });
 const key = () => new Promise(r => keyRes = r);
 const keyA = async () => { while (await key() != 'A'); };
-const isW = c => c >= '1' && c <= '9';
+const isW = c => typeof c == 'string' && c >= '0' && c <= '9';
 const wait = n => new Promise(r => timers.push([fr + n, r]));
 
 // ---------- じょうたい ----------
@@ -139,7 +139,7 @@ const FLR = '.,_ =j';
 const under = i => '.,_ ='.includes(cur[i - 1]) && i % 10 ? cur[i - 1] : th ? ' ' : '.';
 // いまは いない ひと・ものの あとを うめる じめん (みずの うえも ある)
 const fill = i => '.,_ =j~'.includes(cur[i - 1]) && i % 10 ? cur[i - 1] : th ? ' ' : '.';
-const SOLID = 'TM~#^HwBOScCDdiIYy"*utkfploGNVWFRJKQEP';
+const SOLID = 'TM~#^HwBOScCDdiIYy"*utkfplonGNVWFRJKQEPU';
 const KEY = 'kb512-toudaimori';
 const save = () => { try { localStorage[KEY] = JSON.stringify(G); } catch (e) { } };
 const load = () => { try { const g = JSON.parse(localStorage[KEY]); g.f = g.f || {}; return g.c && g; } catch (e) { } };
@@ -147,12 +147,12 @@ const checkpoint = () => { G.c = [rid, P.x, P.y]; save(); };
 
 function spawn(t, x, y) {
   const e = { t, x, y, vx: 0, vy: 0, n: ri(50), hp: { a: 1, A: 2, b: 1, e: 2, g: 3 }[t], inv: 0, w: 16, dx: 1, dy: 0 };
-  if (t == 'Z') { e.b = BOSSR[rid]; e.hp = [8, 8, 12][e.b]; e.x -= 8; e.y -= 8; e.w = 32; e.n = 0; e.s = 0; }
+  if (t == 'Z') { e.b = BOSSR[rid]; e.hp = [8, 8, 12, 9][e.b]; e.x -= 8; e.y -= 8; e.w = 32; e.n = 0; e.s = 0; }
   E.push(e);
   return e;
 }
 function enter(r) {
-  rid = r; th = HOUSE.includes(r) ? 4 : r < 12 ? 0 : r < 20 ? 1 : r < 28 ? 2 : 3;
+  rid = r; th = HOUSE.includes(r) ? 4 : r < 12 || r > 31 && r < 36 ? 0 : r < 20 ? 1 : r < 28 ? 2 : 3;
   dark = DARK.includes(r);
   E = []; sw = []; shots = []; parts = []; slide = seal = auto = 0; told = {};
   const solved = G.S[r];
@@ -166,7 +166,7 @@ function enter(r) {
   }
   for (let i = 0; i < 80; i++) cur[i] = cur[i] === 1 ? fill(i) : cur[i] || under(i);
   G.V[r] = 1;
-  music(th == 4 ? 3 : E.some(e => e.t == 'Z') ? 2 : th ? 1 : 0);
+  music(th == 4 ? 3 : E.some(e => e.t == 'Z') ? 2 : th || r > 31 ? 1 : 0);
 }
 
 // ---------- あたりはんてい ----------
@@ -203,7 +203,7 @@ async function say(s) {
   let who = '';
   for (let pg of s.split('|')) {
     // 「なまえ「せりふ」」は なふだつきで だす。「 から はじまれば まえの ひとの つづき
-    const m = pg.match(/^([^「]{0,8})「(.*?)」?$/);
+    const m = pg.match(/^([^「]{0,10})「(.*?)」?$/);
     if (m) { who = m[1] || who; pg = m[2]; } else who = '';
     const ls = wrap(pg);
     for (let i = 0; i < ls.length; i += 3) {
@@ -273,9 +273,13 @@ async function bossDown(e) {
   for (let i = 0; i < 6; i++) { puff(e.x + ri(32), e.y + ri(32), 'r', 8); sfx.die(); e.inv = 9; await wait(12); }
   E = []; G.S[rid] = 1;
   seal.forEach(([i, c]) => cur[i] = c); seal = 0;
-  for (let i = 0; i < 80; i++) if (cur[i] == 'i') cur[i] = 'I';
+  // いままで いなかった ひとが あらわれる。しょくだいは ともる
+  for (let i = 0; i < 80; i++) { const c = MAP[gi(i)]; if (cur[i] == 'i') cur[i] = 'I'; if (SHOW[rid + c] && SHOW[rid + c](stage())) cur[i] = c; }
   await wait(30);
-  G.mh += 2; G.hp = G.mh; G.s++;
+  await say(BOSSOUT[e.b]);
+  G.mh += 2; G.hp = G.mh;
+  if (e.b > 2) { sfx.heart(); await say('やみが はれ、 からだが かるく なった。 ハートが ひとつ ふえた'); save(); music(1); busy--; return; }
+  G.s++;
   P.d = 0; P.get = SHARD; sfx.shard();
   await wait(110);
   await say(SHARDS[G.s - 1]);
@@ -323,7 +327,7 @@ async function talk(k) {
 }
 function act() {
   const i = front(), ch = cur[i];
-  if (NPC[ch] || ch == 'S') return talk(rid + ch);
+  if (NPC[ch] || ch == 'S' || ch == 'n') return talk(rid + ch);
   if (ch == 'c') return openChest(i);
   if (HINT[ch] && !('*i'.includes(ch) && G.it[1]) && !(ch == 'O' && G.it[2])) return hint(ch);
   if (G.it[0]) { P.sw = 14; P.sid++; sfx.swing(); }
@@ -467,6 +471,14 @@ function enemies() {
       } else if (e.s == 3) { if (!--e.c) e.s = 1; }
       else if (e.s == 1) { e.y += 2; if (e.y > 80) { e.s = 2; sfx.push(); } }
       else { e.y -= .6; if (e.y <= 20) { e.y = 20; e.s = 0; } }
+    } else if (e.b == 3) {        // おおこうもり: 8のじに とび、ときどき つっこむ。よわると こぶんを よぶ
+      if (e.s) { e.x += e.vx; e.y += e.vy; if (!--e.s) e.n = 0; }
+      else {
+        e.x += (64 + Math.cos(e.n / 34) * 50 - e.x) * .06; e.y += (26 + Math.sin(e.n / 17) * 14 - e.y) * .06;
+        if (e.n % 170 == 169) { sfx.boss(); e.s = 46; e.vx = ca * 1.9; e.vy = sa * 1.9; }
+        if (e.hp < 5 && e.n % 120 == 60 && E.length < 3) spawn('b', e.x + 8, e.y + 8).aw = 1;
+      }
+      e.x = Math.max(12, Math.min(116, e.x)); e.y = Math.max(12, Math.min(84, e.y));
     } else if (e.b == 2) {        // きりのヌシ: ひを ふきけし、やみから うつ
       e.x += ca * .3; e.y += sa * .3;
       if (e.n % 150 == 0) { puff(e.x + 16, e.y + 16, 'g', 10); e.x = 16 + ri(96); e.y = 16 + ri(60); for (let k = 0; k < 4; k++) shoot(e.x + 16, e.y + 16, Math.atan2(py - e.y - 8, px - e.x - 8) + k * 1.57, 1); }
@@ -511,6 +523,11 @@ function drawGame() {
   }
   for (const s of shots) { R(s.x - 2, s.y - 3, 4, 6, '3'); R(s.x - 3, s.y - 2, 6, 4, '3'); R(s.x - 1, s.y - 1, 2, 2, 'r'); }
   for (const p of parts) R(p.x, p.y, 2, 2, p.c);
+  if (!th && !G.won) {
+    X.globalAlpha = rid > 31 ? .4 : [.3, .3, .22, .16, .12][stage()];
+    for (const k of [0, 1]) { const o = (fr / (3 + k * 2) + k * 130) % 320 | 0; X.drawImage(fog, o - 320, k * 9); X.drawImage(fog, o, k * 9); }
+    X.globalAlpha = 1;
+  }
   if (dark) {
     DK.globalCompositeOperation = 'source-over'; DK.fillStyle = C('0'); DK.fillRect(0, 0, W, 128);
     DK.globalCompositeOperation = 'destination-out';
@@ -531,8 +548,8 @@ function drawGame() {
   if (mapOn) drawMap();
 }
 function drawMap() {
-  const here = th == 0 ? rid : th == 1 ? 1 : th == 2 ? 11 : th == 3 ? 3 : rid == 31 ? 9 : 5;
-  const goal = [9, 1, 11, 3, -1][!G.it[0] ? 0 : G.won ? 4 : G.s + 1];
+  const here = rid > 31 ? 2 : th == 0 ? rid : th == 1 ? 1 : th == 2 ? 11 : th == 3 ? 3 : rid == 31 ? 9 : 5;
+  const goal = GOALR[stage()];
   box(8, 20, 144, 116);
   T('しまの ちず', 120, 37, 'e', 1);
   for (let i = 0; i < 12; i++) {
@@ -543,7 +560,7 @@ function drawMap() {
     i == here && fr & 8 && (R(x + 9, y + 6, 7, 7, '0'), R(x + 10, y + 7, 5, 5, 'r'));
   }
   T('もくてき', 24, 154, 'e');
-  wrap(GOAL[!G.it[0] ? 0 : G.won ? 4 : G.s + 1], 24).forEach((l, i) => T(l, 24, 170 + i * 14));
+  wrap(GOAL[stage()], 24).forEach((l, i) => T(l, 24, 170 + i * 14));
 }
 function draw() {
   R(0, 0, W, H, '0'); U.clearRect(0, 0, 240, 216);
