@@ -144,6 +144,14 @@ const KEY = 'kb512-toudaimori';
 const save = () => { try { localStorage[KEY] = JSON.stringify(G); } catch (e) { } };
 const load = () => { try { const g = JSON.parse(localStorage[KEY]); g.f = g.f || {}; return g.c && g; } catch (e) { } };
 const checkpoint = () => { G.c = [rid, P.x, P.y]; save(); };
+// へやの きおく (セーブは しない): t=かわった マス, d=たおした てきの いた マス, at=へやを でた とき
+// へやを はなれて 90びょう たつか、たおれると もとに もどる
+let MEM = {};
+const mem = () => MEM[rid] = MEM[rid] || { t: {}, d: [] };
+function remember() {
+  mem().at = G.t;
+  for (let i = 0; i < 80; i++) { const b = G.P[gi(i)] || MAP[gi(i)]; if (b == '"' && cur[i] != '"' || b == 'i' && cur[i] == 'I') mem().t[i] = cur[i]; }
+}
 
 function spawn(t, x, y) {
   const e = { t, x, y, vx: 0, vy: 0, n: ri(50), hp: { a: 1, A: 2, b: 1, e: 2, g: 3 }[t], inv: 0, w: 16, dx: 1, dy: 0 };
@@ -156,12 +164,15 @@ function enter(r) {
   dark = DARK.includes(r);
   E = []; sw = []; shots = []; parts = []; slide = seal = auto = 0; told = {};
   const solved = G.S[r];
+  if (MEM[r] && G.t - MEM[r].at > 5400) delete MEM[r];
   for (let i = 0; i < 80; i++) {
     let ch = G.P[gi(i)] || MAP[gi(i)];
+    const m = MEM[r];
+    if (m && m.t[i]) ch = m.t[i];
     if (SHOW[r + ch] && !SHOW[r + ch](stage())) ch = 1;      // いまは いない
     if (solved) ch = ch == 'd' ? ' ' : ch == 'i' ? 'I' : ch == '?' ? 'c' : ch;
     if (ch == 'x') sw.push(i);
-    if ('aAbegZ'.includes(ch)) { ch == 'Z' && solved || spawn(ch, i % 10 * 16, (i / 10 | 0) * 16); ch = 0; }
+    if ('aAbegZ'.includes(ch)) { if (!(ch == 'Z' && solved) && !(m && m.d.includes(i))) spawn(ch, i % 10 * 16, (i / 10 | 0) * 16).i = i; ch = 0; }
     cur[i] = ch;
   }
   for (let i = 0; i < 80; i++) cur[i] = cur[i] === 1 ? fill(i) : cur[i] || under(i);
@@ -242,6 +253,7 @@ async function warp(ch) {
   await fadeTo(1);
   const here = gi(tileAt(P.x + 8, P.y + 12)), to = MAP.indexOf(ch) == here ? MAP.lastIndexOf(ch) : MAP.indexOf(ch);
   const gx = to % 40, gy = to / 40 | 0;
+  remember();
   enter((gx / 10 | 0) + (gy >> 3) * 4);
   const i = gx % 10 + gy % 8 * 10, n = [10, -10, 1, -1].find(d => !SOLID.includes(cur[i + d]) && cur[i + d] != null && !isW(cur[i + d]));
   P.x = (i + n) % 10 * 16; P.y = ((i + n) / 10 | 0) * 16 - 4; P.d = n == 10 ? 0 : n == -10 ? 1 : n == 1 ? 3 : 2;
@@ -255,7 +267,7 @@ async function die() {
   await wait(60); await fadeTo(1);
   G.dth++;
   await say('めのまえが くらくなる… でも、 まだ おわれない');
-  G.hp = G.mh;
+  G.hp = G.mh; MEM = {};
   enter(G.c[0]); P.x = G.c[1]; P.y = G.c[2]; P.inv = P.kb = 0; P.safe = 50;
   await fadeTo(0);
   busy--;
@@ -381,7 +393,7 @@ function update() {
         if (!e.hp) {
           if (e.t == 'Z') { e.hp = 0; bossDown(e); return; }
           sfx.die(); puff(e.x + 8, e.y + 8, 'r', 10);
-          e.dead = 1;
+          e.dead = 1; mem().d.push(e.i);
           rnd() < .3 && G.hp < G.mh && E.push({ t: 'h', x: e.x, y: e.y, w: 16, n: 0 });
         }
       }
@@ -401,10 +413,12 @@ function update() {
   const mx = P.x + 8, my = P.y + 12, ex = mx < 0 ? -1 : mx >= 160 ? 1 : 0, ey = my < 0 ? -1 : my >= 128 ? 1 : 0;
   if (ex || ey) {
     drawRoom(old.getContext('2d'));
+    remember();
     enter(rid + ex + ey * 4);
     P.x = ex ? ex > 0 ? -4 : 148 : P.x; P.y = ey ? ey > 0 ? -8 : 112 : P.y;
     // でぐちに いわが あれば となりへ よける
     for (let k = 0; k < 17 && !free(P.x, P.y); k++) for (const s of [-k, k]) if (free(P.x + (ey ? s : 0), P.y + (ex ? s : 0))) { P.x += ey ? s : 0; P.y += ex ? s : 0; break; }
+    if (!free(P.x, P.y)) for (const [a, b] of [[3, 8], [12, 8], [3, 15], [12, 15]]) { const t = Math.min(9, Math.max(0, P.x + a >> 4)) + Math.min(7, Math.max(0, P.y + b >> 4)) * 10; if (cur[t] == '"') cur[t] = '.'; }
     tr = { x: ex, y: ey, t: 0 };
     P.safe = 50;
     if (BOSSR[rid] != null && !G.S[rid]) { auto = 1; P.d = ey > 0 ? 0 : ey < 0 ? 1 : ex < 0 ? 2 : 3; }
