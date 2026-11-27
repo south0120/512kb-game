@@ -1,7 +1,9 @@
 const W = 160, H = 144;
 const cv = document.getElementById('c'), cx = cv.getContext('2d');
 const sc = cnv(W, H), X = sc.getContext('2d');
-X.imageSmoothingEnabled = false;
+// もじは えより こまかい 240x216 の そうに かいて かさねる (えの 2/3 の おおきさ)
+const uc = cnv(240, 216), U = uc.getContext('2d');
+U.imageSmoothingEnabled = false;
 const rnd = () => Math.random();
 const ri = n => rnd() * n | 0;
 
@@ -17,7 +19,7 @@ function T(s, x, y, col = '1', al = 0, k = 1) {
     g.fillStyle = C(col);
     for (let i = 0; i < fb.length; i++) for (let b = 0; b < 7; b++) fb.charCodeAt(i) >> (6 - b) & 1 && g.fillRect((i / 7 | 0) * 8 + b, i % 7, 1, 1);
   }
-  for (const ch of s) { const i = FCH.indexOf(DIG[ch] || ch); i >= 0 && X.drawImage(f, i * 8, 0, 8, 8, x, y, 8 * k, 8 * k); x += 8 * k; }
+  for (const ch of s) { const i = FCH.indexOf(DIG[ch] || ch); i >= 0 && U.drawImage(f, i * 8, 0, 8, 8, x, y, 8 * k, 8 * k); x += 8 * k; }
 }
 const R = (x, y, w, h, c) => { X.fillStyle = C(c); X.fillRect(x, y, w, h); };
 const spr = (im, x, y, flip) => { x = Math.round(x); y = Math.round(y); if (flip) { X.save(); X.scale(-1, 1); X.drawImage(im, -x - im.width, y); X.restore(); } else X.drawImage(im, x, y); };
@@ -128,7 +130,7 @@ const wait = n => new Promise(r => timers.push([fr + n, r]));
 
 // ---------- じょうたい ----------
 // G: セーブされるもの。P: 主人公。cur: いまの へやの 80マス。E: てき・おとしもの。
-let G, cur = [], rid = 0, th = 0, dark = 0, E = [], sw = [], shots = [], parts = [], slide = 0, tr = 0, dlg = 0, busy = 0, fade = 0, scene = 0, mapOn = 0, told = {};
+let G, cur = [], rid = 0, th = 0, dark = 0, E = [], sw = [], shots = [], parts = [], slide = 0, seal = 0, tr = 0, dlg = 0, busy = 0, fade = 0, scene = 0, mapOn = 0, told = {};
 const P = { x: 0, y: 0, d: 0, sw: 0, lt: 0, inv: 0, kb: 0, kx: 0, ky: 0, push: 0, wf: 0, get: 0, sid: 0 };
 const old = cnv(W, 128), dk = cnv(W, 128), DK = dk.getContext('2d');
 const gi = i => ((rid >> 2) * 8 + (i / 10 | 0)) * 40 + (rid & 3) * 10 + i % 10;
@@ -142,14 +144,14 @@ const checkpoint = () => { G.c = [rid, P.x, P.y]; save(); };
 
 function spawn(t, x, y) {
   const e = { t, x, y, vx: 0, vy: 0, n: ri(50), hp: { a: 1, A: 2, b: 1, e: 2, g: 3 }[t], inv: 0, w: 16, dx: 1, dy: 0 };
-  if (t == 'Z') { e.b = BOSSR[rid]; e.hp = [8, 10, 12][e.b]; e.x -= 8; e.y -= 8; e.w = 32; e.n = 0; e.s = 0; }
+  if (t == 'Z') { e.b = BOSSR[rid]; e.hp = [8, 8, 12][e.b]; e.x -= 8; e.y -= 8; e.w = 32; e.n = 0; e.s = 0; }
   E.push(e);
   return e;
 }
 function enter(r) {
   rid = r; th = r < 12 ? 0 : r < 20 ? 1 : r < 28 ? 2 : 3;
   dark = DARK.includes(r);
-  E = []; sw = []; shots = []; parts = []; slide = 0; told = {};
+  E = []; sw = []; shots = []; parts = []; slide = seal = 0; told = {};
   const solved = G.S[r];
   for (let i = 0; i < 80; i++) {
     let ch = G.P[gi(i)] || MAP[gi(i)];
@@ -204,10 +206,10 @@ const hitE = (e, x, y, w, h) => x < e.x + e.w - 2 && x + w > e.x + 2 && y < e.y 
 const puff = (x, y, c, n = 6) => { for (let i = 0; i < n; i++) parts.push({ x, y, vx: rnd() * 2 - 1, vy: rnd() * 2 - 1.5, l: 12 + ri(10), c }); };
 
 // ---------- かいわ ----------
-function wrap(s) {
+function wrap(s, n = 25) {
   const ls = [];
   let l = '';
-  for (const w of s.split(' ')) if (l && l.length + w.length > 16) { ls.push(l); l = w; } else l += (l ? ' ' : '') + w;
+  for (const w of s.split(' ')) if (l && l.length + w.length >= n) { ls.push(l); l = w; } else l += (l ? ' ' : '') + w;
   ls.push(l);
   return ls;
 }
@@ -263,7 +265,7 @@ async function die() {
   music(-1); sfx.dead();
   await wait(60); await fadeTo(1);
   G.dth++;
-  await say('ちからつきた… でも まだ おわれない');
+  await say('ともしびが きえかけた… でも まだ おわれない');
   G.hp = G.mh;
   enter(G.c[0]); P.x = G.c[1]; P.y = G.c[2]; P.inv = P.kb = 0;
   await fadeTo(0);
@@ -281,12 +283,13 @@ async function bossDown(e) {
   music(-1); shots = []; E = E.filter(o => o == e);
   for (let i = 0; i < 6; i++) { puff(e.x + ri(32), e.y + ri(32), 'r', 8); sfx.die(); e.inv = 9; await wait(12); }
   E = []; G.S[rid] = 1;
+  seal.forEach(([i, c]) => cur[i] = c); seal = 0;
   for (let i = 0; i < 80; i++) if (cur[i] == 'i') cur[i] = 'I';
   await wait(30);
   G.mh += 2; G.hp = G.mh; G.s++;
   P.d = 0; P.get = SHARD; sfx.shard();
   await wait(110);
-  await say('あかりの かけらを てにいれた！ （' + DIG[G.s] + '／３）|ハートの うつわも ひとつ ふえた' + (G.s < 3 ? '|' + NEXT[G.s] : ''));
+  await say('あかりの かけらを てにいれた！ （' + DIG[G.s] + '／３）|ともしびも ひとつ ふえた' + (G.s < 3 ? '|' + NEXT[G.s] : ''));
   P.get = 0;
   save();
   if (G.s > 2) await ending(); else music(1);
@@ -304,11 +307,11 @@ async function ending() {
   scene = () => {
     R(0, 0, W, H, '0');
     spr(SHARD, 72, 24);
-    T('ちいさな とうだいもり', 80, 48, 'e', 1);
-    T('おしまい', 80, 68, '1', 1);
-    T('じかん ' + (G.t / 3600 | 0) + 'ふん', 80, 90, '9', 1);
-    T('たおれた かず ' + G.dth, 80, 102, '9', 1);
-    T('あそんでくれて ありがとう', 80, 124, '1', 1);
+    T('ちいさな とうだいもり', 120, 72, 'e', 1);
+    T('おしまい', 120, 100, '1', 1);
+    T('じかん ' + (G.t / 3600 | 0) + 'ふん', 120, 134, '9', 1);
+    T('たおれた かず ' + G.dth, 120, 150, '9', 1);
+    T('あそんでくれて ありがとう', 120, 186, '1', 1);
   };
   fade = 0;
   await wait(60); await keyA();
@@ -362,6 +365,7 @@ function update() {
         if (e.b == 2 && !cur.includes('I')) { sfx.ting(); hint('f'); continue; }
         e.hp--; e.inv = 14; sfx.hit();
         if (e.w < 32) { e.kx = DX[P.d] * 3; e.ky = DY[P.d] * 3; e.kb = 6; }
+        else if (e.hp && rnd() < .25) E.push({ t: 'h', x: 16 + ri(112), y: 16 + ri(80), w: 16, n: 0 });
         if (!e.hp) {
           if (e.t == 'Z') { e.hp = 0; bossDown(e); return; }
           sfx.die(); puff(e.x + 8, e.y + 8, 'r', 10);
@@ -397,6 +401,11 @@ function update() {
   if (isW(ch)) return warp(ch);
   if (ch == 'h') { cur[i] = under(i); G.P[gi(i)] = cur[i]; G.mh += 2; G.hp = G.mh; save(); getItem(4, tl.h); }
   if (slide && (slide.t += 2) >= 16) slide = 0;
+  if (BOSSR[rid] != null && !G.S[rid] && !seal && P.x > 13 && P.x < 131 && P.y > 8 && P.y < 96) {
+    seal = [];
+    cur.forEach((c, i) => { const tx = i % 10, ty = i / 10 | 0; if (isW(c) || (!tx || !ty || tx > 8 || ty > 6) && !SOLID.includes(c)) { seal.push([i, c]); cur[i] = 'd'; } });
+    sfx.boss(); sfx.push();
+  }
   enemies();
   // しかけが とけたか
   if (!G.S[rid] && (cur.includes('d') || cur.includes('?')) && !E.some(e => e.hp) && !cur.includes('i') && sw.every(i => cur[i] == 'B')) {
@@ -405,8 +414,6 @@ function update() {
     sfx.solve(); save();
   }
 }
-GET[4] = 'ハートの うつわを みつけた！ たいりょくが ふえた';
-HINT.f = 'やみに まぎれて きれない！ しょくだいに ひを ともせ';
 
 // ---------- てき ----------
 function shoot(x, y, a, sp = 1.2) { shots.push({ x, y, vx: Math.cos(a) * sp, vy: Math.sin(a) * sp }); }
@@ -414,6 +421,7 @@ function enemies() {
   const px = P.x, py = P.y + 2;
   E = E.filter(e => !e.dead);
   for (const e of E) {
+    if (e.t == 'Z' && !seal) continue;
     e.n++;
     if (e.inv) e.inv--;
     const ang = Math.atan2(py - e.y, px - e.x), ca = Math.cos(ang), sa = Math.sin(ang);
@@ -442,17 +450,18 @@ function enemies() {
       if (c == 26) { sfx.push(); if (e.hp < 5 && E.length < 3) spawn('a', e.x + 8, e.y + 8).n = 30; }
     } else if (e.b == 1) {        // おおばさみ: よこあるき、あわ、つっこみ
       if (e.s == 0) {
-        e.x += e.dx * 1.3; if (e.x < 18 || e.x > 110) e.dx = -e.dx;
-        if (e.n % 90 == 45) { sfx.boss(); for (const d of [-.35, 0, .35]) shoot(e.x + 16, e.y + 20, Math.atan2(py - e.y - 12, px - e.x - 8) + d); }
-        if (e.n % 260 == 0) e.s = 1;
-      } else if (e.s == 1) { e.y += 2.4; if (e.y > 80) { e.s = 2; sfx.push(); } }
-      else { e.y -= .8; if (e.y <= 20) { e.y = 20; e.s = 0; } }
+        e.x += e.dx; if (e.x < 18 || e.x > 110) e.dx = -e.dx;
+        if (e.n % 130 == 65) { sfx.boss(); for (const d of [-.3, .3]) shoot(e.x + 16, e.y + 20, Math.atan2(py - e.y - 12, px - e.x - 8) + d, 1); }
+        if (e.n % 300 == 0) { e.s = 3; e.c = 45; }
+      } else if (e.s == 3) { if (!--e.c) e.s = 1; }
+      else if (e.s == 1) { e.y += 2; if (e.y > 80) { e.s = 2; sfx.push(); } }
+      else { e.y -= .6; if (e.y <= 20) { e.y = 20; e.s = 0; } }
     } else if (e.b == 2) {        // きりのヌシ: ひを ふきけし、やみから うつ
       e.x += ca * .3; e.y += sa * .3;
       if (e.n % 150 == 0) { puff(e.x + 16, e.y + 16, 'g', 10); e.x = 16 + ri(96); e.y = 16 + ri(60); for (let k = 0; k < 4; k++) shoot(e.x + 16, e.y + 16, Math.atan2(py - e.y - 8, px - e.x - 8) + k * 1.57, 1); }
       if (e.n % 400 == 399 && cur.includes('I')) { sfx.dark(); cur.forEach((c, i) => { if (c == 'I') { cur[i] = 'i'; puff(i % 10 * 16 + 8, (i / 10 | 0) * 16 + 4, 'g', 6); } }); }
     }
-    if (e.hp && !e.kb && hitE(e, P.x + 3, P.y + 4, 10, 11)) hurt(e.b ? 2 : 1, e.x + e.w / 2 - 8, e.y + e.w / 2 - 8);
+    if (e.hp && !e.kb && hitE(e, P.x + 3, P.y + 4, 10, 11)) hurt(e.b > 1 ? 2 : 1, e.x + e.w / 2 - 8, e.y + e.w / 2 - 8);
   }
   shots = shots.filter(s => {
     s.x += s.vx; s.y += s.vy;
@@ -472,7 +481,7 @@ function drawGame() {
   for (const e of E) {
     if (e.inv & 2) continue;
     if (e.t == 'h') { e.n > 380 && fr & 4 || spr(IC.h, e.x + 4, e.y + 4 - (e.n < 8 ? 8 - e.n : 0)); continue; }
-    if (e.t == 'Z') { X.globalAlpha = e.b == 2 && !cur.includes('I') ? .45 : 1; spr(BOSS[e.b], e.x, e.y + (e.b ? Math.sin(e.n / 12) * 2 : e.n % (e.hp > 4 ? 84 : 60) < 26 ? -5 : 0)); X.globalAlpha = 1; continue; }
+    if (e.t == 'Z') { X.globalAlpha = e.b == 2 && !cur.includes('I') ? .45 : 1; spr(BOSS[e.b], e.x + (e.s == 3 ? (fr & 2) - 1 : 0), e.y + (e.b ? Math.sin(e.n / 12) * 2 : e.n % (e.hp > 4 ? 84 : 60) < 26 ? -5 : 0)); X.globalAlpha = 1; continue; }
     const im = EN[e.t], sl = e.t == 'a' || e.t == 'A';
     spr(im[im.length > 1 ? e.n >> 3 & 1 : 0], e.x, e.y - (sl && e.n % (e.t == 'a' ? 70 : 46) < 20 ? 3 : e.t == 'g' ? Math.sin(e.n / 10) * 2 : 0));
   }
@@ -502,9 +511,9 @@ function drawGame() {
   X.restore();
   // うえの じょうほう
   R(0, 0, W, 16, '0');
-  for (let i = 0; i < G.mh / 2; i++) spr(G.hp >= i * 2 + 2 ? IC.h : IC.e, 4 + i * 8, 4), G.hp == i * 2 + 1 && X.drawImage(IC.h, 0, 0, 4, 8, 4 + i * 8, 4, 4, 8);
+  for (let i = 0; i < G.mh / 2; i++) spr(G.hp >= i * 2 + 2 ? IC.h : IC.e, 4 + i * 8, 4), G.hp == i * 2 + 1 && X.drawImage(IC.h, 0, 4, 8, 4, 4 + i * 8, 8, 8, 4);
   G.it[1] && spr(IC.l, 84, 4); G.it[2] && spr(IC.b, 94, 4);
-  if (G.k) { spr(IC.k, 106, 4); T(DIG[G.k], 114, 4); }
+  if (G.k) { spr(IC.k, 106, 4); T(G.k, 171, 7); }
   for (let i = 0; i < 3; i++) spr(i < G.s ? IC.s : IC.o, 130 + i * 9, 4);
   if (mapOn) drawMap();
 }
@@ -512,7 +521,7 @@ function drawMap() {
   const here = th == 0 ? rid : th == 1 ? 1 : th == 2 ? 11 : rid == 31 ? 9 : 3;
   const goal = [9, 1, 11, 3, -1][!G.it[0] ? 0 : G.won ? 4 : G.s + 1];
   box(8, 20, 144, 116);
-  T('しまの ちず', 80, 25, 'e', 1);
+  T('しまの ちず', 120, 37, 'e', 1);
   for (let i = 0; i < 12; i++) {
     const x = 28 + i % 4 * 26, y = 38 + (i >> 2) * 20;
     R(x, y, 25, 19, 'k');
@@ -520,21 +529,22 @@ function drawMap() {
     i == goal && fr & 16 && spr(IC.s, x + 9, y + 6);
     i == here && fr & 8 && (R(x + 9, y + 6, 7, 7, '0'), R(x + 10, y + 7, 5, 5, 'r'));
   }
-  T('もくてき', 14, 102, 'e');
-  wrap(GOAL[!G.it[0] ? 0 : G.won ? 4 : G.s + 1]).forEach((l, i) => T(l, 14, 113 + i * 10));
+  T('もくてき', 24, 154, 'e');
+  wrap(GOAL[!G.it[0] ? 0 : G.won ? 4 : G.s + 1], 24).forEach((l, i) => T(l, 24, 170 + i * 14));
 }
 function draw() {
-  R(0, 0, W, H, '0');
+  R(0, 0, W, H, '0'); U.clearRect(0, 0, 240, 216);
   if (scene) scene(); else if (G) drawGame();
   if (fade) { X.globalAlpha = fade; R(0, 0, W, H, '0'); X.globalAlpha = 1; }
   if (dlg) {
     const y = !scene && G && P.y > 56 ? 18 : 98;
     box(4, y, 152, 42);
     let n = dlg.n;
-    dlg.l.forEach((l, i) => { T(l.slice(0, Math.max(0, n)), 12, y + 6 + i * 11); n -= l.length; });
+    dlg.l.forEach((l, i) => { T(l.slice(0, Math.max(0, n)), 18, y * 1.5 + 10 + i * 17); n -= l.length; });
     dlg.n > 98 && fr & 16 && R(142, y + 34, 5, 3, 'e');
   }
   cx.drawImage(sc, 0, 0, cv.width, cv.height);
+  cx.drawImage(uc, 0, 0, cv.width, cv.height);
 }
 
 // ---------- はじまり ----------
@@ -550,11 +560,11 @@ async function title() {
     R(0, 0, W, 74, '0');
     spr(SHARD, 72, 2 + Math.sin(fr / 20) * 2);
     // だいめいは 2ばいの おおきさで、かげつき
-    ['ちいさな', 'とうだいもり'].forEach((s, i) => { T(s, 82, 23 + i * 18, 'c', 1, 2); T(s, 80, 21 + i * 18, 'e', 1, 2); });
-    T('きえた あかりと ３つの かけら', 80, 61, '1', 1);
+    ['ちいさな', 'とうだいもり'].forEach((s, i) => { T(s, 123, 33 + i * 28, 'c', 1, 3); T(s, 120, 30 + i * 28, 'e', 1, 3); });
+    T('きえた あかりと ３つの かけら', 120, 93, '1', 1);
     const it = sv ? ['つづきから', 'はじめから'] : ['はじめる'];
-    it.forEach((s, i) => { T(s, 80, 100 + i * 12, i == sel ? '1' : '9', 1); i == sel && R(80 - s.length * 4 - 8, 102 + i * 12, 4, 4, 'e'); });
-    T('Ｚ：けってい', 80, 132, '9', 1);
+    it.forEach((s, i) => { T(s, 120, 150 + i * 18, i == sel ? '1' : '9', 1); i == sel && R(72 - s.length * 2.7 | 0, 101 + i * 12, 4, 4, 'e'); });
+    T('［Ｚ］ けってい', 120, 198, '9', 1);
   };
   for (let k; (k = await key()) != 'A';) if (sv && (k == 'U' || k == 'D')) { sel ^= 1; sfx.blip(); }
   sfx.open();
@@ -568,7 +578,7 @@ async function title() {
     fade = 1; scene = 0;
     enter(31); P.x = 64; P.y = 60; P.d = 1; checkpoint();
     await fadeTo(0);
-    await say('じいちゃん「うう… こしを やってしもうた。 すまんが おまえが かけらを あつめておくれ」|「そこの たからばこに わしの つるぎが ある。 もっていきなさい」');
+    await say(HELLO);
   }
   await fadeTo(0);
   busy--;
@@ -586,7 +596,8 @@ const touch = matchMedia('(pointer:coarse)').matches;
 document.getElementById('t').hidden = !touch;
 document.getElementById('h').hidden = touch;
 function fit() {
-  const dpr = devicePixelRatio || 1, s = Math.max(1, Math.min((innerWidth - 32) / W, (innerHeight - (touch ? 230 : 56)) / H) * dpr | 0);
+  // 1マスを 3の ばいすうに して、もじの そう(1.5ばい)も ぴったり のせる
+  const dpr = devicePixelRatio || 1, s = Math.max(3, (Math.min((innerWidth - 32) / W, (innerHeight - (touch ? 230 : 56)) / H) * dpr / 3 | 0) * 3);
   cv.width = W * s; cv.height = H * s; cv.style.width = W * s / dpr + 'px';
   cx.imageSmoothingEnabled = false;
 }
