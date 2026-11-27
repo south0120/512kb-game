@@ -78,9 +78,9 @@ M....A...M|M.n..HH..M|M,e,,,o,,M|M.......MM
 MMM....MMM|M....g...M|~~~~~~~~~~|M..n.S..MM
 MMMMMMMMMM|MMMMMMMMMM|~~~~~~~~~~|MMMMMMMMMM
 ##########|##########|##########|##########
-#i      i#|#i  b   i#|#    n   #|#i   n   #
+#i      i#|#i  b   i#|#      n #|#i   n   #
 #        #|#   n    #|# x #B   #|#        #
-#  U Z    |d  g      |d     O   |d   g    #
+#  U Z    |d  g      |d         |d   g    #
 #         |d      g  |d         |d      g #
 #        #|#   b    #|#  B # x #|#        #
 #i      i#|#        #|#        #|#i       #

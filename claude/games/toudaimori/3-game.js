@@ -146,7 +146,7 @@ const load = () => { try { const g = JSON.parse(localStorage[KEY]); g.f = g.f ||
 const checkpoint = () => { G.c = [rid, P.x, P.y]; save(); };
 // へやの きおく (セーブは しない): t=かわった マス, d=たおした てきの いた マス, at=へやを でた とき
 // へやを はなれて 5ふん たつか、たおれると もとに もどる
-let MEM = {};
+let MEM = {}, IN = [0, 0];
 const mem = () => MEM[rid] = MEM[rid] || { t: {}, d: [] };
 function remember() {
   mem().at = G.t;
@@ -155,7 +155,7 @@ function remember() {
 
 function spawn(t, x, y) {
   const e = { t, x, y, vx: 0, vy: 0, n: ri(50), hp: { a: 1, A: 2, b: 1, e: 2, g: 3 }[t], inv: 0, w: 16, dx: 1, dy: 0 };
-  if (t == 'Z') { e.b = BOSSR[rid]; e.hp = [8, 8, 12, 9][e.b]; e.x -= 8; e.y -= 8; e.w = 32; e.n = 0; e.s = 0; }
+  if (t == 'Z') { e.b = BOSSR[rid]; e.hp = [6, 8, 12, 9][e.b]; e.x -= 8; e.y -= 8; e.w = 32; e.n = 0; e.s = 0; }
   E.push(e);
   return e;
 }
@@ -257,7 +257,7 @@ async function warp(ch) {
   enter((gx / 10 | 0) + (gy >> 3) * 4);
   const i = gx % 10 + gy % 8 * 10, n = [10, -10, 1, -1].find(d => !SOLID.includes(cur[i + d]) && cur[i + d] != null && !isW(cur[i + d]));
   P.x = (i + n) % 10 * 16; P.y = ((i + n) / 10 | 0) * 16 - 4; P.d = n == 10 ? 0 : n == -10 ? 1 : n == 1 ? 3 : 2;
-  P.safe = 50; checkpoint();
+  P.safe = 50; IN = [P.x, P.y]; checkpoint();
   await fadeTo(0);
   busy--;
 }
@@ -268,7 +268,7 @@ async function die() {
   G.dth++;
   await say('めのまえが くらくなる… でも、 まだ おわれない');
   G.hp = G.mh; MEM = {};
-  enter(G.c[0]); P.x = G.c[1]; P.y = G.c[2]; P.inv = P.kb = 0; P.safe = 50;
+  enter(G.c[0]); P.x = G.c[1]; P.y = G.c[2]; P.inv = P.kb = 0; P.safe = 50; IN = [P.x, P.y];
   await fadeTo(0);
   busy--;
 }
@@ -360,10 +360,20 @@ function pushing() {
   P.push = 0;
   if (ch == 'O' && !G.it[2]) return hint('O');
   const tx = i % 10 + DX[P.d], ty = (i / 10 | 0) + DY[P.d], j = tx + ty * 10;
-  if (tx < 0 || ty < 0 || tx > 9 || ty > 7 || !' .,_x'.includes(cur[j]) || E.some(e => e.hp && hitE(e, tx * 16, ty * 16, 16, 16))) return;
+  if (tx < 0 || ty < 0 || tx > 9 || ty > 7 || !' .,_x'.includes(cur[j])) return;
+  // つまない ための きまり: でいりぐちの まえには おけない。へやの はしへは、となりに とおれる マスが のこる ときだけ おせる
+  const at = d => { const n = j + d; return n < 0 || n > 79 || Math.abs(d) == 1 && (n / 10 | 0) != ty ? '#' : cur[n]; };
+  if ([1, -1, 10, -10].some(d => isW(at(d)))) return;
+  const bx = !tx || tx > 8;
+  if ((bx || !ty || ty > 6) && SOLID.includes(at(bx ? 10 : 1)) && SOLID.includes(at(bx ? -10 : -1))) return;
+  for (const e of E) if (e.hp && e.w < 32 && hitE(e, tx * 16, ty * 16, 16, 16)) {
+    e.kx = DX[P.d] * 3; e.ky = DY[P.d] * 3; e.kb = 8; e.inv = 14;
+    if (--e.hp) sfx.hit(); else { e.dead = 1; mem().d.push(e.i); sfx.die(); puff(e.x + 8, e.y + 8, 'r', 10); }
+  }
   const u = sw.includes(i) ? 'x' : under(i);
   cur[j] = ch; cur[i] = u;
-  if (ch == 'O') { G.P[gi(i)] = u; G.P[gi(j)] = ch; }
+  // おおいわの いちは ずっと のこる。ただし スイッチの ある へやでは、はこと おなじく もとに もどる (つまない ように)
+  if (ch == 'O' && !sw.length) { G.P[gi(i)] = u; G.P[gi(j)] = ch; }
   slide = { ch, to: j, x: i % 10 * 16, y: (i / 10 | 0) * 16, t: 0 };
   sfx.push();
 }
@@ -423,6 +433,7 @@ function update() {
     for (let k = 0; k < 17 && !free(P.x, P.y); k++) for (const s of [-k, k]) if (free(P.x + (ey ? s : 0), P.y + (ex ? s : 0))) { P.x += ey ? s : 0; P.y += ex ? s : 0; break; }
     if (!free(P.x, P.y)) for (const [a, b] of [[3, 8], [12, 8], [3, 15], [12, 15]]) { const t = Math.min(9, Math.max(0, P.x + a >> 4)) + Math.min(7, Math.max(0, P.y + b >> 4)) * 10; if (cur[t] == '"') cur[t] = '.'; }
     tr = { x: ex, y: ey, t: 0 };
+    IN = [P.x, P.y];
     P.safe = 50;
     if (BOSSR[rid] != null && !G.S[rid]) { auto = 1; P.d = ey > 0 ? 0 : ey < 0 ? 1 : ex < 0 ? 2 : 3; }
     if (!th) checkpoint();
@@ -477,9 +488,9 @@ function enemies() {
       }
     } else if (e.t == 'g') { e.x += ca * .32; e.y += sa * .32; }
     else if (e.b == 0) {          // おおなめ: とびかかる。よわると こぶんを よぶ
-      const c = e.n % (e.hp > 4 ? 84 : 60);
-      if (c < 26) { e.x = Math.max(16, Math.min(112, e.x + ca * 1.2)); e.y = Math.max(16, Math.min(80, e.y + sa * 1.2)); }
-      if (c == 26) { sfx.push(); if (e.hp < 5 && E.length < 3) spawn('a', e.x + 8, e.y + 8).n = 30; }
+      const c = e.n % (e.hp > 2 ? 110 : 90);
+      if (c < 16) { e.x = Math.max(16, Math.min(112, e.x + ca * .9)); e.y = Math.max(16, Math.min(80, e.y + sa * .9)); }
+      if (c == 16) { sfx.push(); if (e.hp < 3 && E.length < 2) spawn('a', e.x + 8, e.y + 8).n = 30; }
     } else if (e.b == 1) {        // おおばさみ: よこあるき、あわ、つっこみ
       if (e.s == 0) {
         e.x += e.dx; if (e.x < 18 || e.x > 110) e.dx = -e.dx;
@@ -522,7 +533,7 @@ function drawGame() {
     if (e.inv & 2) continue;
     e.t == 'h' || shade(X, e.x + e.w / 2 - 5, e.y + e.w - 2, 10, 2, .25);
     if (e.t == 'h') { e.n > 380 && fr & 4 || spr(IC.h, e.x + 4, e.y + 4 - (e.n < 8 ? 8 - e.n : 0)); continue; }
-    if (e.t == 'Z') { X.globalAlpha = e.b == 2 && !cur.includes('I') ? .45 : 1; spr(BOSS[e.b], e.x + (e.s == 3 ? (fr & 2) - 1 : 0), e.y + (e.b ? Math.sin(e.n / 12) * 2 : e.n % (e.hp > 4 ? 84 : 60) < 26 ? -5 : 0)); X.globalAlpha = 1; continue; }
+    if (e.t == 'Z') { X.globalAlpha = e.b == 2 && !cur.includes('I') ? .45 : 1; spr(BOSS[e.b], e.x + (e.s == 3 ? (fr & 2) - 1 : 0), e.y + (e.b ? Math.sin(e.n / 12) * 2 : e.n % (e.hp > 2 ? 110 : 90) < 16 ? -4 : 0)); X.globalAlpha = 1; continue; }
     const im = EN[e.t], sl = e.t == 'a' || e.t == 'A';
     spr(im[im.length > 1 ? e.n >> 3 & 1 : 0], e.x, e.y - (sl && e.n % (e.t == 'a' ? 70 : 46) < 20 ? 3 : e.t == 'g' ? Math.sin(e.n / 10) * 2 : 0));
   }
@@ -577,7 +588,8 @@ function drawMap() {
     i == here && fr & 8 && (R(x + 9, y + 6, 7, 7, '0'), R(x + 10, y + 7, 5, 5, 'r'));
   }
   T('もくてき', 24, 154, 'e');
-  wrap(GOAL[stage()], 24).forEach((l, i) => T(l, 24, 170 + i * 14));
+  wrap(GOAL[stage()], 24).forEach((l, i) => T(l, 24, 168 + i * 12));
+  T('［Ｘ］ へやの いりぐちに もどる', 120, 193, '9', 1);
 }
 function draw() {
   R(0, 0, W, H, '0'); U.clearRect(0, 0, 240, 216);
@@ -617,14 +629,14 @@ async function title() {
   for (let k; (k = await key()) != 'A';) if (sv && (k == 'U' || k == 'D')) { sel ^= 1; sfx.blip(); }
   sfx.open();
   await fadeTo(1);
-  if (sv && !sel) { G = sv; enter(G.c[0]); P.x = G.c[1]; P.y = G.c[2]; scene = 0; }
+  if (sv && !sel) { G = sv; enter(G.c[0]); IN = [P.x = G.c[1], P.y = G.c[2]]; scene = 0; }
   else {
     G.V = {};
     scene = () => R(0, 0, W, H, '0');
     fade = 0; music(3);
     await say(INTRO);
     fade = 1; scene = 0;
-    enter(31); P.x = 64; P.y = 60; P.d = 1; checkpoint();
+    enter(31); IN = [P.x = 64, P.y = 60]; P.d = 1; checkpoint();
     await fadeTo(0);
     await say(HELLO);
   }
@@ -635,7 +647,10 @@ function tick() {
   fr++;
   for (let i = timers.length; i--;) if (timers[i][0] <= fr) timers.splice(i, 1)[0][1]();
   if (tr) { if ((tr.t += .06) >= 1) tr = 0; }
-  else if (mapOn) { if (tap.M || tap.A || tap.B) mapOn = 0; }
+  else if (mapOn) {
+    if (tap.B) { enter(rid); P.x = IN[0]; P.y = IN[1]; P.kb = P.sw = P.push = 0; P.safe = 50; sfx.stair(); }
+    if (tap.M || tap.A || tap.B) mapOn = 0;
+  }
   else if (G && !busy && !scene) update();
   parts = parts.filter(p => { p.x += p.vx; p.y += p.vy; p.vy += .1; return --p.l > 0; });
   tap = {};
